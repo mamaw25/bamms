@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { User, Calendar as CalendarIcon, LogOut, CheckCircle, Clock } from 'lucide-react';
+import { User, Calendar as CalendarIcon, LogOut, CheckCircle } from 'lucide-react';
 import { signOut } from '@/app/login/action';
 import CalendarGrid from './CalendarGrid'; 
 import { clockIn, clockOut } from './actions'; 
+import ActionButton from './ActionButton'; // Import the new component
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -20,16 +21,18 @@ export default async function DashboardPage() {
   const { data: attendance } = await supabase
     .from('attendance')
     .select('*')
-    .eq('profile_id', user.id);
+    .eq('profile_id', user.id)
+    .order('date', { ascending: false });
 
-  // Logic for Clock In / Clock Out states
-  const now = new Date();
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  const todayRecord = attendance?.find(record => record.date === todayStr);
+  // Logic to determine button state
+  const activeRecord = attendance?.find(record => record.clock_out === null);
+  const isClockedIn = !!activeRecord;
+  const todayStr = new Date().toLocaleDateString('en-CA');
   
-  const isClockedIn = !!todayRecord;
-  const isClockedOut = !!todayRecord?.clock_out;
+  const finishedRecordToday = attendance?.find(record => record.date === todayStr && record.clock_out !== null);
+  const finishedToday = !!finishedRecordToday;
 
+  const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
 
@@ -73,34 +76,40 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Action Button Section */}
           <div className="mb-6">
-            {!isClockedIn ? (
-              <form action={async () => { 'use server'; await clockIn(user.id); }}>
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition shadow-md flex items-center justify-center gap-2">
-                  Check In for Today
-                </button>
-              </form>
-            ) : !isClockedOut ? (
-              <form action={async () => { 
-                'use server'; 
-                console.log("Clock out triggered for user:", user.id);
-                const result = await clockOut(user.id); 
-                console.log("Clock out result:", result);
-              }}>
-                <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl transition shadow-md flex items-center justify-center gap-2">
-                  <Clock size={20} /> Clock Out for Today
-                </button>
-              </form>
+            {!isClockedIn && !finishedToday ? (
+              /* Case: User needs to Clock In */
+              <ActionButton 
+                type="in" 
+                firstName={profile?.first_name || 'User'} 
+                onConfirm={async () => { 
+                  'use server'; 
+                  await clockIn(user.id, profile?.first_name || 'User'); 
+                }} 
+              />
+            ) : isClockedIn ? (
+              /* Case: User needs to Clock Out */
+              <ActionButton 
+                type="out" 
+                firstName={profile?.first_name || 'User'} 
+                onConfirm={async () => { 
+                  'use server'; 
+                  await clockOut(user.id, profile?.first_name || 'User', activeRecord?.id); 
+                }} 
+              />
             ) : (
-              <div className="w-full bg-green-50 text-green-700 border border-green-200 font-bold py-4 rounded-xl text-center flex items-center justify-center gap-2">
-                <CheckCircle size={20} /> Shift Completed
+              /* Case: Shift Completed */
+              <div className="flex flex-col items-center gap-1 w-full bg-green-50 text-green-700 border border-green-200 py-4 rounded-xl text-center">
+                <div className="flex items-center gap-2 font-bold uppercase tracking-wider">
+                  <CheckCircle size={20} /> Shift Completed
+                </div>
+                {finishedRecordToday?.clock_out && (
+                  <p className="text-xs font-medium opacity-80">
+                    Clocked out at: {new Date(finishedRecordToday.clock_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                )}
               </div>
             )}
-          </div>
-
-          <div className="grid grid-cols-7 gap-2 text-center text-[10px] font-black text-gray-400 mb-2 uppercase">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => <div key={d}>{d}</div>)}
           </div>
 
           <CalendarGrid 

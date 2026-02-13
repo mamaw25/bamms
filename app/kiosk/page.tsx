@@ -2,24 +2,35 @@
 
 import { useState } from 'react';
 import { handleKioskAction } from '../dashboard/actions';
-import { Clock, Fingerprint, CheckCircle, AlertCircle, LogOut as LogOutIcon } from 'lucide-react';
+import { Clock, Fingerprint, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function KioskPage() {
   const [idNum, setIdNum] = useState('');
   const [status, setStatus] = useState<{ msg: string; type: 'success' | 'error' | null }>({ msg: '', type: null });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const processAction = async (type: 'in' | 'out') => {
-    if (!idNum) return;
-    const res = await handleKioskAction(idNum, type);
+  const processAction = async () => {
+    if (!idNum || isLoading) return;
+    setIsLoading(true);
+    const res = await handleKioskAction(idNum);
     
-    if (res.success) {
-      setStatus({ msg: `Successfully Clocked ${type.toUpperCase()}`, type: 'success' });
+    if (res.success && 'message' in res) {
+      setStatus({ msg: (res.message as string) || 'Action completed', type: 'success' });
       setIdNum('');
     } else {
-      setStatus({ msg: res.error || 'Action failed', type: 'error' });
+      setStatus({ msg: (res.error as string) || 'Action failed', type: 'error' });
     }
     
-    setTimeout(() => setStatus({ msg: '', type: null }), 6000);
+    setTimeout(() => {
+      setIsLoading(false);
+      setStatus({ msg: '', type: null });
+    }, 3000);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      processAction();
+    }
   };
 
   return (
@@ -37,17 +48,14 @@ export default function KioskPage() {
           placeholder="ENTER ID NUMBER"
           value={idNum}
           onChange={(e) => setIdNum(e.target.value)}
+          onKeyPress={handleKeyPress}
+          autoFocus
           className="w-full bg-[#0f172a] border-2 border-slate-700 rounded-xl px-6 py-4 text-3xl text-center font-mono mb-6 focus:border-blue-500 focus:outline-none transition-all text-white"
         />
 
-        <div className="grid grid-cols-2 gap-4">
-          <button onClick={() => processAction('in')} className="bg-[#16a34a] hover:bg-green-500 py-4 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2">
-            <Clock size={20} /> TIME IN
-          </button>
-          <button onClick={() => processAction('out')} className="bg-[#ea580c] hover:bg-orange-500 py-4 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2">
-            <LogOutIcon size={20} /> TIME OUT
-          </button>
-        </div>
+        <button onClick={processAction} disabled={isLoading} className="w-full bg-[#2563eb] hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed py-4 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2">
+          <Clock size={20} /> {isLoading ? 'PROCESSING...' : 'SUBMIT'}
+        </button>
 
         {status.type && (
           <div className={`mt-8 p-4 rounded-xl flex items-center justify-center gap-3 animate-in fade-in zoom-in duration-300 ${
