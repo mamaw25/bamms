@@ -6,7 +6,7 @@ import { Clock, AlertTriangle } from 'lucide-react';
 interface ActionButtonProps {
   type: 'in' | 'out';
   firstName: string;
-  onConfirm: () => Promise<void>;
+  onConfirm?: () => Promise<void>;
 }
 
 export default function ActionButton({ type, firstName, onConfirm }: ActionButtonProps) {
@@ -16,8 +16,12 @@ export default function ActionButton({ type, firstName, onConfirm }: ActionButto
   const isClockIn = type === 'in';
 
   const handleAction = async () => {
+    // 1. Check if onConfirm exists to satisfy TypeScript
+    if (!onConfirm) return;
+
     setLoading(true);
     try {
+      // 2. Safely invoke the function
       await onConfirm();
     } catch (error) {
       console.error("Action failed:", error);
@@ -30,6 +34,7 @@ export default function ActionButton({ type, firstName, onConfirm }: ActionButto
   return (
     <>
       <button 
+        type="button" // Change to "button" so it doesn't submit the form until confirmed
         onClick={() => setShowModal(true)}
         className={`w-full font-bold py-4 rounded-xl transition shadow-md flex items-center justify-center gap-2 ${
           isClockIn 
@@ -55,6 +60,7 @@ export default function ActionButton({ type, firstName, onConfirm }: ActionButto
 
             <div className="flex gap-3">
               <button 
+                type="button"
                 onClick={() => setShowModal(false)}
                 className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition"
                 disabled={loading}
@@ -62,6 +68,7 @@ export default function ActionButton({ type, firstName, onConfirm }: ActionButto
                 Cancel
               </button>
               <button 
+                type="button" // Use handleAction to call the server action passed via props
                 onClick={handleAction}
                 className={`flex-1 px-4 py-2 text-white rounded-lg font-semibold transition ${
                   isClockIn ? 'bg-blue-600 hover:bg-blue-700' : 'bg-orange-600 hover:bg-orange-700'

@@ -18,7 +18,8 @@ function SuccessContent() {
         </div>
         
         <h1 className="text-2xl font-extrabold text-slate-900 mb-2">Account Created!</h1>
-        <p className="text-slate-500 mb-6 text-sm">Please save your Unique ID Number below. You will need it to log in.</p>
+        <p className="text-slate-500 mb-6 text-sm">Please save your Unique ID Number below.
+          You will need it to log in.</p>
         
         <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 mb-8">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Your Login ID</span>

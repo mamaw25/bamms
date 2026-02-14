@@ -1,54 +1,44 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 
-export async function loginWithID(formData: FormData) {
-  const idNumber = formData.get('idNumber') as string
-
-  // 1. Create a "Privileged" client to bypass RLS
-  // This avoids the 'fetch failed' error caused by RLS restrictions on 'anon' users
-  const supabaseAdmin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-
-  // 2. Look up the email and verification status using the Master Key
-  const { data: profile, error: pError } = await supabaseAdmin
-    .from('profiles')
-    .select('email, is_verified')
-    .eq('unique_id_number', Number(idNumber))
-    .single()
-
-  // If the database can't find the ID
-  if (pError || !profile) {
-    return { error: "ID Number not found. Please register first." }
-  }
-
-  // 3. Block unverified accounts
-  if (!profile.is_verified) {
-    return { error: "Your account is pending Admin verification." }
-  }
-
-  // 4. Perform the actual Auth Sign-in with the standard client
-  // This creates the session cookie for the user browser
+/**
+ * Handles user login with Email and Password
+ */
+export async function login(formData: FormData) {
   const supabase = await createClient()
-  const { error: authError } = await supabase.auth.signInWithPassword({
-    email: profile.email,
-    password: "User123!", 
+
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
   })
 
-  if (authError) {
-    return { error: "Authentication failed: " + authError.message }
+  if (error) {
+    return { error: error.message }
   }
 
-  // 5. Success!
+  revalidatePath('/', 'layout')
   redirect('/dashboard')
 }
 
+/**
+ * Handles user sign out and clears the session
+ * Adding this fix to resolve the "Export signOut doesn't exist" build error
+ */
 export async function signOut() {
   const supabase = await createClient()
+
+  // 1. Terminate the Supabase session
   await supabase.auth.signOut()
+
+  // 2. Wipe the cache so the dashboard doesn't show old user data
+  revalidatePath('/', 'layout')
+
+  // 3. Send the user back to the login page
   redirect('/login')
 }
