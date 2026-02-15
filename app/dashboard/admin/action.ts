@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 
+// 1. Interfaces for Type Safety
 interface RawAttendance {
   id: string;
   date: string;
@@ -12,7 +13,8 @@ interface RawAttendance {
     first_name: string;
     last_name: string;
     unique_id_number: string;
-    role: string | null; // Database can return null
+    role: string | null; 
+    email: string | null;
   } | null;
 }
 
@@ -26,10 +28,12 @@ export interface AttendanceReport {
     first_name: string;
     last_name: string;
     unique_id_number: string;
-    role: string; // Interface requires a string
+    role: string;
+    email: string;
   };
 }
 
+// 2. Fetch Attendance Logs (Synced with Profiles)
 export async function getAttendanceReport(selectedDate?: string): Promise<AttendanceReport[]> {
   const supabase = await createClient();
 
@@ -41,7 +45,8 @@ export async function getAttendanceReport(selectedDate?: string): Promise<Attend
         first_name,
         last_name,
         unique_id_number,
-        role
+        role,
+        email
       )
     `);
 
@@ -82,9 +87,27 @@ export async function getAttendanceReport(selectedDate?: string): Promise<Attend
         first_name: record.profiles?.first_name || 'MISSING',
         last_name: record.profiles?.last_name || `PROFILE (${record.profile_id.slice(-5)})`,
         unique_id_number: record.profiles?.unique_id_number || 'N/A',
-        // FIX: Use the null-coalescing operator (??) to ensure a string is always provided
-        role: record.profiles?.role ?? 'staff' 
+        role: record.profiles?.role ?? 'staff',
+        email: record.profiles?.email ?? 'no-email@system.com'
       }
     };
   });
+}
+
+// 3. NEW: Fetch All Staff Profiles (No Room for Errors)
+// This links directly to the same table used for attendance logs.
+export async function getStaffProfiles() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('last_name', { ascending: true });
+
+  if (error) {
+    console.error('Database Error:', error.message);
+    throw new Error('Failed to fetch staff profiles');
+  }
+
+  return data;
 }

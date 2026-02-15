@@ -1,20 +1,17 @@
-'use client'
+'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Fingerprint, CheckCircle, AlertCircle, Loader2, User, ShieldCheck, UserPlus } from 'lucide-react';
+import Link from 'next/link';
 import { handleKioskAction } from './dashboard/actions';
-import { Fingerprint, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function KioskLandingPage() {
   const [idNumber, setIdNumber] = useState('');
   const [status, setStatus] = useState<{ msg: string; type: 'success' | 'error' | null }>({ msg: '', type: null });
   const [isLoading, setIsLoading] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
+  // Auto-focus input on load and after interactions
   useEffect(() => {
     if (!isLoading && status.type === null) {
       inputRef.current?.focus();
@@ -28,42 +25,39 @@ export default function KioskLandingPage() {
 
     try {
       const res = await handleKioskAction(idNumber);
-      setIsLoading(false);
       if (res.success) {
         setStatus({ msg: res.message || 'SUCCESSFULLY RECORDED', type: 'success' });
         setIdNumber(''); 
       } else {
         setStatus({ msg: res.error || 'ERROR OCCURRED', type: 'error' });
       }
-    } catch {
-      setIsLoading(false);
+    } catch (error) {
+      console.error("Kiosk Error:", error);
       setStatus({ msg: 'CONNECTION ERROR', type: 'error' });
     } finally {
+      setIsLoading(false);
       setTimeout(() => setStatus({ msg: '', type: null }), 3500);
     }
   };
 
-  if (!isMounted) return <div className="min-h-screen bg-[#0f172a]" />;
-
   return (
     <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center p-4 text-white font-sans">
-      {/* 1. Removed 'pb-10' and used 'pb-8' to bring the bottom edge up.
-          2. Kept 'max-w-md' for consistent width but tightened vertical space.
-      */}
-      <div className="bg-[#1e293b] pt-10 px-10 pb-8 rounded-3xl shadow-2xl border border-slate-700 w-full max-w-md text-center transition-all duration-500">
+      
+      {/* Main Kiosk Box */}
+      <div className="bg-[#1e293b] pt-10 px-8 pb-8 rounded-3xl shadow-2xl border border-slate-700 w-full max-w-md text-center transition-all">
         
-        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transition-all duration-300 ${
+        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transition-all duration-300 ${
           status.type === 'success' ? 'bg-green-600' : 
-          status.type === 'error' ? 'bg-red-600 animate-shake' : 
+          status.type === 'error' ? 'bg-red-600 animate-pulse' : 
           'bg-[#2563eb]'
         }`}>
-          {isLoading ? <Loader2 size={40} className="animate-spin" /> : <Fingerprint size={40} />}
+          {isLoading ? <Loader2 size={32} className="animate-spin" /> : <Fingerprint size={32} />}
         </div>
         
-        <h1 className="text-3xl font-black mb-2 uppercase tracking-tight">Attendance Kiosk</h1>
-        <p className="text-slate-400 mb-8 font-medium">Enter ID and press Enter</p>
+        <h1 className="text-2xl font-black mb-1 uppercase tracking-tight">Attendance Kiosk</h1>
+        <p className="text-slate-400 mb-6 text-sm font-medium">Enter ID and press Enter</p>
 
-        <div className="relative">
+        <div className="relative mb-6">
           <input
             ref={inputRef}
             type="text"
@@ -71,31 +65,49 @@ export default function KioskLandingPage() {
             value={idNumber}
             onChange={(e) => setIdNumber(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && processAction()}
-            autoFocus
             autoComplete="off"
-            suppressHydrationWarning 
-            className="w-full bg-[#0f172a] border-2 border-slate-700 rounded-xl px-6 py-5 text-4xl text-center font-bold tracking-[0.2em] focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-800"
+            className="w-full bg-[#0f172a] border-2 border-slate-700 rounded-xl px-4 py-4 text-3xl text-center font-bold tracking-[0.2em] focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-800 text-white"
           />
         </div>
 
-        {/* 3. CRITICAL CHANGE: Removed 'min-h-[80px]' and 'mt-8'.
-            4. Used 'h-auto' so the box only expands if there is a message.
-        */}
+        {/* Minimal One-Line Navigation */}
+        <div className="flex items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-widest border-t border-slate-700/50 pt-6">
+          <Link href="/login?role=staff" className="flex items-center gap-1 text-emerald-500 hover:text-emerald-400 transition-colors">
+            <User size={12} />
+            <span>Staff Login</span>
+          </Link>
+          
+          <span className="w-1 h-1 bg-slate-700 rounded-full" />
+          
+          <Link href="/login?role=admin" className="flex items-center gap-1 text-blue-500 hover:text-blue-400 transition-colors">
+            <ShieldCheck size={12} />
+            <span>Admin Login</span>
+          </Link>
+          
+          <span className="w-1 h-1 bg-slate-700 rounded-full" />
+          
+          <Link href="/register" className="flex items-center gap-1 text-white hover:text-slate-300 transition-colors">
+            <UserPlus size={12} />
+            <span>Register</span>
+          </Link>
+        </div>
+
+        {/* Feedback Message */}
         <div className="h-auto">
           {status.type && (
-            <div className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 animate-in fade-in zoom-in slide-in-from-top-2 duration-300 border ${
+            <div className={`mt-4 p-3 rounded-xl flex items-center justify-center gap-2 border animate-in fade-in slide-in-from-top-2 ${
               status.type === 'success' 
                 ? 'bg-green-500/10 text-green-400 border-green-500/20' 
                 : 'bg-red-500/10 text-red-400 border-red-500/20'
             }`}>
-              {status.type === 'success' ? <CheckCircle size={22}/> : <AlertCircle size={22}/>}
-              <span className="font-bold text-sm tracking-wide uppercase">{status.msg}</span>
+              {status.type === 'success' ? <CheckCircle size={18}/> : <AlertCircle size={18}/>}
+              <span className="font-bold text-[11px] tracking-wide uppercase">{status.msg}</span>
             </div>
           )}
         </div>
       </div>
       
-      <p className="mt-8 text-slate-600 text-xs font-mono uppercase tracking-widest">
+      <p className="mt-8 text-slate-600 text-[9px] font-mono uppercase tracking-[0.4em] opacity-50">
         Barangay Management System
       </p>
     </div>

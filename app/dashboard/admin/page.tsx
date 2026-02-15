@@ -1,3 +1,4 @@
+// app/dashboard/admin/attendance/page.tsx
 import { getAttendanceReport, AttendanceReport } from './action';
 import { Calendar, Users, Filter, X } from 'lucide-react';
 import Link from 'next/link';
@@ -5,6 +6,7 @@ import ExportButton from './ExportButton';
 
 export const revalidate = 0;
 
+// Note: In Next.js 15, searchParams is a Promise
 export default async function AdminReportingPage({
   searchParams,
 }: {
@@ -20,12 +22,13 @@ export default async function AdminReportingPage({
         
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Attendance Report</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Attendance Report</h1>
             <p className="text-gray-500 font-medium">Monitoring staff activity and work hours</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <form action="/dashboard/admin" method="GET" className="flex items-center gap-1 bg-white p-1.5 rounded-xl border border-gray-200 shadow-sm hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 focus-within:border-blue-500 transition-all">
+            {/* Action points to the attendance subfolder now */}
+            <form action="/dashboard/admin/attendance" method="GET" className="flex items-center gap-1 bg-white p-1.5 rounded-xl border border-gray-200 shadow-sm hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 focus-within:border-blue-500 transition-all">
               <label className="flex items-center cursor-pointer px-2 gap-2">
                 <Calendar size={18} className="text-gray-400" />
                 <input 
@@ -41,7 +44,7 @@ export default async function AdminReportingPage({
                   <Filter size={16} />
                 </button>
                 {selectedDate && (
-                  <Link href="/dashboard/admin" title="Clear Filter" className="p-2 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-lg transition-colors">
+                  <Link href="/dashboard/admin/attendance" title="Clear Filter" className="p-2 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-lg transition-colors">
                     <X size={16} />
                   </Link>
                 )}
