@@ -2,47 +2,54 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { handleKioskAction } from '../dashboard/actions';
-import { Clock, Fingerprint, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Fingerprint, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function KioskPage() {
-  const [idNum, setIdNum] = useState('');
+  const [idNumber, setIdNumber] = useState('');
   const [status, setStatus] = useState<{ msg: string; type: 'success' | 'error' | null }>({ msg: '', type: null });
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, [status]);
+    setIsMounted(true);
+  }, []);
+
+  // Snappy refocus whenever loading stops or status clears
+  useEffect(() => {
+    if (!isLoading && status.type === null) {
+      inputRef.current?.focus();
+    }
+  }, [isLoading, status.type]);
 
   const processAction = async () => {
-    if (!idNum || isLoading) return;
+    if (!idNumber || isLoading) return;
     
     setIsLoading(true);
     setStatus({ msg: '', type: null });
 
     try {
-      const res = await handleKioskAction(idNum);
-      
+      const res = await handleKioskAction(idNumber);
+      setIsLoading(false); // Stop loading animation immediately
+
       if (res.success) {
-        // Safe access to message and type
-        const successMsg = res.message || 'Action completed successfully';
         setStatus({ 
-          msg: successMsg, 
+          msg: res.message || 'SUCCESSFULLY RECORDED', 
           type: 'success' 
         });
-        setIdNum(''); 
+        setIdNumber(''); 
       } else {
         setStatus({ 
-          msg: res.error || 'Database error occurred.', 
+          msg: res.error || 'ERROR OCCURRED', 
           type: 'error' 
         });
       }
     } catch {
-      // Removed 'err' to satisfy ESLint @typescript-eslint/no-unused-vars
-      setStatus({ msg: 'System connection error.', type: 'error' });
+      setIsLoading(false);
+      setStatus({ msg: 'CONNECTION ERROR', type: 'error' });
     } finally {
+      // Message clears after 3.5s, shrinking the box back to original size
       setTimeout(() => {
-        setIsLoading(false);
         setStatus({ msg: '', type: null });
       }, 3500);
     }
@@ -54,46 +61,51 @@ export default function KioskPage() {
     }
   };
 
+  if (!isMounted) return <div className="min-h-screen bg-[#0f172a]" />;
+
   return (
-    <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center p-6 text-white font-sans">
-      <div className="bg-[#1e293b] p-10 rounded-3xl shadow-2xl border border-slate-700 w-full max-w-md text-center">
-        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transition-colors duration-500 ${
-          status.type === 'success' ? 'bg-green-600' : status.type === 'error' ? 'bg-red-600' : 'bg-[#2563eb]'
+    <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center p-4 text-white font-sans">
+      {/* 1. Dimensional change: Switched to pt-10 and pb-8 to match the centered look */}
+      <div className="bg-[#1e293b] pt-10 px-10 pb-8 rounded-3xl shadow-2xl border border-slate-700 w-full max-w-md text-center transition-all duration-500">
+        
+        {/* 2. Biometric Logo: Red for errors (including already logged in) */}
+        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transition-all duration-300 ${
+          status.type === 'success' ? 'bg-green-600 scale-110 shadow-green-500/20' : 
+          status.type === 'error' ? 'bg-red-600 shadow-red-500/20 animate-shake' : 
+          'bg-[#2563eb]'
         }`}>
-          <Fingerprint size={40} className={isLoading ? 'animate-pulse' : ''} />
+          {isLoading ? (
+            <Loader2 size={40} className="animate-spin" />
+          ) : (
+            <Fingerprint size={40} />
+          )}
         </div>
         
         <h1 className="text-3xl font-black mb-2 uppercase tracking-tight">Kiosk Terminal</h1>
         <p className="text-slate-400 mb-8 font-medium">Enter your ID to record attendance</p>
 
         <div className="relative">
-          <input 
+          <input
             ref={inputRef}
-            type="text" 
-            placeholder="ENTER ID NUMBER"
-            value={idNum}
-            onChange={(e) => setIdNum(e.target.value)}
+            type="text"
+            placeholder="ID NUMBER"
+            value={idNumber}
+            onChange={(e) => setIdNumber(e.target.value)}
             onKeyDown={handleKeyPress}
-            disabled={isLoading}
-            className="w-full bg-[#0f172a] border-2 border-slate-700 rounded-xl px-6 py-4 text-3xl text-center font-mono mb-6 focus:border-blue-500 focus:outline-none transition-all text-white placeholder:text-slate-800 disabled:opacity-50"
+            autoFocus
+            autoComplete="off"
+            suppressHydrationWarning 
+            className="w-full bg-[#0f172a] border-2 border-slate-700 rounded-xl px-6 py-5 text-4xl text-center font-bold tracking-[0.2em] focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-800"
           />
         </div>
 
-        <button 
-          onClick={processAction} 
-          disabled={isLoading || !idNum} 
-          className="w-full bg-[#2563eb] hover:bg-blue-600 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed py-4 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2"
-        >
-          {isLoading ? <Loader2 className="animate-spin" size={20} /> : <Clock size={20} />}
-          {isLoading ? 'PROCESSING...' : 'SUBMIT'}
-        </button>
-
-        <div className="min-h-[80px] mt-8">
+        {/* 3. Height Optimization: Removed min-height so the box is compact by default */}
+        <div className="h-auto">
           {status.type && (
-            <div className={`p-4 rounded-xl flex items-center justify-center gap-3 animate-in fade-in zoom-in duration-300 ${
+            <div className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 animate-in fade-in zoom-in slide-in-from-top-2 duration-300 border ${
               status.type === 'success' 
-                ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
-                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                ? 'bg-green-500/10 text-green-400 border-green-500/20' 
+                : 'bg-red-500/10 text-red-400 border-red-500/20'
             }`}>
               {status.type === 'success' ? <CheckCircle size={22}/> : <AlertCircle size={22}/>}
               <span className="font-bold text-sm tracking-wide uppercase">{status.msg}</span>

@@ -1,6 +1,5 @@
 'use server'
 
-// Helper: Create admin client with service role key
 async function createAdminClient() {
   const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
   return createSupabaseClient(
@@ -15,30 +14,29 @@ export async function signUp(formData: FormData) {
   const password = formData.get('password') as string
   const first_name = formData.get('firstName') as string
   const last_name = formData.get('lastName') as string
+  
+  // Get the admin code from the form
+  const adminCode = formData.get('adminCode') as string
+
+  // --- SET YOUR SECRET CODE HERE ---
+  const SECRET_ADMIN_PASS = "ADMIN123"; 
+  const userRole = adminCode === SECRET_ADMIN_PASS ? 'admin' : 'staff';
 
   // Validate inputs
-  if (!email || !email.trim()) {
-    return { success: false, error: "Email is required" }
-  }
-  if (!password || password.length < 6) {
-    return { success: false, error: "Password must be at least 6 characters" }
-  }
-  if (!first_name || !first_name.trim()) {
-    return { success: false, error: "First name is required" }
-  }
-  if (!last_name || !last_name.trim()) {
-    return { success: false, error: "Last name is required" }
-  }
+  if (!email || !email.trim()) return { success: false, error: "Email is required" }
+  if (!password || password.length < 6) return { success: false, error: "Password must be at least 6 characters" }
+  if (!first_name || !first_name.trim()) return { success: false, error: "First name is required" }
+  if (!last_name || !last_name.trim()) return { success: false, error: "Last name is required" }
 
   try {
-    // Use admin API to create user without requiring email confirmation
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: email.trim(),
       password,
       email_confirm: true,
       user_metadata: { 
         first_name: first_name.trim(), 
-        last_name: last_name.trim() 
+        last_name: last_name.trim(),
+        role: userRole // Optional: also store in auth metadata
       }
     })
 
@@ -48,14 +46,15 @@ export async function signUp(formData: FormData) {
 
     const userId = authData.user.id
 
-    // Create profile
+    // Create profile with the assigned role
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .insert({
         id: userId,
         email: email.trim(),
         first_name: first_name.trim(),
-        last_name: last_name.trim()
+        last_name: last_name.trim(),
+        role: userRole // This is crucial for your RLS policies
       })
       .select()
       .single()
@@ -70,7 +69,8 @@ export async function signUp(formData: FormData) {
         first_name: profile.first_name,
         last_name: profile.last_name,
         email: profile.email,
-        unique_id_number: profile.unique_id_number
+        unique_id_number: profile.unique_id_number,
+        role: profile.role
       }
     }
   } catch (err) {
