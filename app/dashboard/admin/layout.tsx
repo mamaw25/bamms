@@ -13,12 +13,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         
         {/* Navigation Section */}
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-10 px-2">
-            <div className="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-600/20">
+          <Link href="/dashboard/admin" className="flex items-center gap-3 mb-10 px-2 hover:opacity-80 transition-opacity group">
+            <div className="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-transform">
               <LayoutDashboard size={20} />
             </div>
             <span className="font-bold tracking-tight text-xl uppercase">Admin Panel</span>
-          </div>
+          </Link>
 
           <nav className="space-y-2">
             <Link 
