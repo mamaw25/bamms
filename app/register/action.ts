@@ -48,7 +48,7 @@ export async function signUp(formData: FormData) {
 
     return { success: true, error: null }
   } catch (error) {
-    console.error('Sign up error:', error) // Uses the variable, fixing ESLint
+    console.error('Sign up error:', error)
     return { success: false, error: "An unexpected error occurred" }
   }
 }
