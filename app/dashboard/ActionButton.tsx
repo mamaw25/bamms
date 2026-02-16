@@ -21,7 +21,6 @@ export default function ActionButton({ type, firstName, onConfirm }: ActionButto
 
     setLoading(true);
     try {
-      // 2. Safely invoke the function
       await onConfirm();
     } catch (error) {
       console.error("Action failed:", error);
@@ -34,7 +33,7 @@ export default function ActionButton({ type, firstName, onConfirm }: ActionButto
   return (
     <>
       <button 
-        type="button" // Change to "button" so it doesn't submit the form until confirmed
+        type="button"
         onClick={() => setShowModal(true)}
         className={`w-full font-bold py-4 rounded-xl transition shadow-md flex items-center justify-center gap-2 ${
           isClockIn 
@@ -68,7 +67,7 @@ export default function ActionButton({ type, firstName, onConfirm }: ActionButto
                 Cancel
               </button>
               <button 
-                type="button" // Use handleAction to call the server action passed via props
+                type="button"
                 onClick={handleAction}
                 className={`flex-1 px-4 py-2 text-white rounded-lg font-semibold transition ${
                   isClockIn ? 'bg-blue-600 hover:bg-blue-700' : 'bg-orange-600 hover:bg-orange-700'
