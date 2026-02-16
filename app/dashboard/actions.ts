@@ -6,7 +6,7 @@ type KioskResponse =
   | { success: true; message: string; type: 'in' | 'out' }
   | { success: false; error: string; message?: never; type?: never };
 
-// Helper: Create admin client with service role key for kiosk operations
+// Help create admin client with service role key for kiosk operations
 async function createAdminClient() {
   const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
   return createSupabaseClient(
