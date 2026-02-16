@@ -15,7 +15,6 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-  // 1. Just take name and value here. Ignore the third property.
   cookiesToSet.forEach(({ name, value }) => 
     request.cookies.set(name, value)
   )
@@ -24,7 +23,6 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
-  // 2. Use all three here because they are passed to the response.
   cookiesToSet.forEach(({ name, value, options }) =>
     supabaseResponse.cookies.set(name, value, options)
   )
@@ -33,12 +31,11 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // This refreshes the session if it's expired
+  // Refreshes the session if it's expired
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // OPTIONAL: Simple redirect logic
   // If no user and trying to access dashboard, send to login
   if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
     const url = request.nextUrl.clone()
