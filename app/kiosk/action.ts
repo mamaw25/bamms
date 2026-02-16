@@ -3,10 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-/**
- * Handles Kiosk Clock In/Out via ID Number
- * Aligned with Kiosk Page status expectations
- */
+ // Handles Kiosk Clock In/Out via ID Number
 export async function handleKioskAction(idNumber: string) {
   const supabase = await createClient()
 
