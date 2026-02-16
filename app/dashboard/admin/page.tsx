@@ -1,4 +1,4 @@
-// app/dashboard/admin/attendance/page.tsx
+
 import { getAttendanceReport, AttendanceReport } from './action';
 import { Calendar, Users, Filter, X } from 'lucide-react';
 import Link from 'next/link';
@@ -6,7 +6,6 @@ import ExportButton from './ExportButton';
 
 export const revalidate = 0;
 
-// Note: In Next.js 15, searchParams is a Promise
 export default async function AdminReportingPage({
   searchParams,
 }: {
