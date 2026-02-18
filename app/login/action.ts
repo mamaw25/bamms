@@ -30,11 +30,8 @@ export async function login(formData: FormData) {
     return { success: false, error: "Profile not found." }
   }
 
-  /**
-   * CORRECTED REDIRECT LOGIC
-   * If database says 'admin' -> go to /dashboard/admin
-   * Otherwise -> go to /dashboard (staff dashboard)
-   */
+   // If database says 'admin' -> go to /dashboard/admin
+   // Otherwise -> go to /dashboard (staff dashboard)
   const redirectUrl = profile.role === 'admin' ? '/dashboard/admin' : '/dashboard'
   
   // Revalidate paths to ensure user data is fresh
@@ -43,9 +40,7 @@ export async function login(formData: FormData) {
   return { success: true, redirectUrl }
 }
 
-/**
- * FIXED: Added 'export' so the dashboard and layouts can see this member.
- */
+ // Added 'export' so the dashboard and layouts can see this member.
 export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()

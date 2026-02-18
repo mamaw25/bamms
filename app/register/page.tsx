@@ -9,7 +9,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  // This wrapper function fixes the TypeScript "action" error
+  // This fixes the TypeScript "action" error
   async function handleSubmit(formData: FormData) {
     setLoading(true)
     setError(null)

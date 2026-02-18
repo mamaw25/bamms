@@ -4,7 +4,7 @@ import { useState, Suspense } from 'react';
 import { login } from './action';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ShieldCheck, User, Loader2 } from 'lucide-react';
-import Link from 'next/link'; // Import Link to fix the ESLint error
+import Link from 'next/link';
 
 function LoginForm() {
   const router = useRouter();
