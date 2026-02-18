@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { Users, Edit2, Trash2, Plus } from 'lucide-react';
-import { signOut } from '@/app/login/action';
+import { Users, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { StaffActionButtons } from './StaffActionButtons';
 
 export default async function StaffManagementPage() {
   const supabase = await createClient();
@@ -34,11 +35,6 @@ export default async function StaffManagementPage() {
           <h1 className="text-2xl font-black text-gray-800 tracking-tight">Manage Staff</h1>
           <p className="text-sm text-gray-500 font-medium">View and manage staff members</p>
         </div>
-        <form action={signOut}>
-          <button type="submit" className="flex items-center gap-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
-            Sign Out
-          </button>
-        </form>
       </header>
 
       {/* Staff List Section */}
@@ -48,9 +44,11 @@ export default async function StaffManagementPage() {
             <Users size={20} />
             <h2>Staff Members ({staffMembers?.length || 0})</h2>
           </div>
-          <button className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
-            <Plus size={16} /> Add Staff
-          </button>
+          <Link href="/dashboard/admin/staff/add">
+            <button className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
+              <Plus size={16} /> Add Staff
+            </button>
+          </Link>
         </div>
 
         {staffMembers && staffMembers.length > 0 ? (
@@ -83,14 +81,12 @@ export default async function StaffManagementPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors" title="Edit">
-                          <Edit2 size={18} />
-                        </button>
-                        <button className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors" title="Delete">
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
+                      <StaffActionButtons
+                        staffId={staff.id}
+                        firstName={staff.first_name}
+                        lastName={staff.last_name}
+                        uniqueId={staff.unique_id_number}
+                      />
                     </td>
                   </tr>
                 ))}

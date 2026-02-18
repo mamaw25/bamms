@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Users, ClipboardList, LogOut, LayoutDashboard } from 'lucide-react';
+import { Users, ClipboardList, LogOut, LayoutDashboard, Calendar } from 'lucide-react';
 import { signOut } from '@/app/register/action';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -34,6 +34,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <Users size={18} className="text-emerald-400 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium">Manage Staff</span>
+            </Link>
+            <Link 
+              href="/dashboard/admin/meetings" 
+              className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-all group"
+            >
+              <Calendar size={18} className="text-purple-400 group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium">Barangay Meetings</span>
             </Link>
           </nav>
         </div>

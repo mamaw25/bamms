@@ -4,6 +4,16 @@ import { Calendar, Users, Filter, X } from 'lucide-react';
 import Link from 'next/link';
 import ExportButton from './ExportButton';
 
+// Helper function to format time consistently on server without locale conversion
+function formatTimeForServer(dateString: string | null): string {
+  if (!dateString) return '--:--:--';
+  const date = new Date(dateString);
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+}
+
 export const revalidate = 0;
 
 export default async function AdminReportingPage({
@@ -92,11 +102,11 @@ export default async function AdminReportingPage({
                       <td className="px-6 py-4 text-gray-600 font-medium">{row.date}</td>
                       <td className="px-4 py-4">
                         <div className="text-[11px] font-bold text-blue-600 uppercase">
-                          IN: {new Date(row.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          IN: {formatTimeForServer(row.check_in)}
                         </div>
                         {row.clock_out ? (
                           <div className="text-[11px] font-bold text-orange-600 uppercase">
-                            OUT: {new Date(row.clock_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                            OUT: {formatTimeForServer(row.clock_out)}
                           </div>
                         ) : (
                           <div className="text-[10px] font-black text-green-500 animate-pulse mt-1 tracking-tighter">● ON SITE</div>
