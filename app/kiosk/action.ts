@@ -4,7 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
  // Handles Kiosk Clock In/Out via ID Number
-export async function handleKioskAction(idNumber: string) {
+export async function handleKioskAction(
+  idNumber: string
+): Promise<
+  | { success: true; type: 'in' | 'out'; message: string }
+  | { success: false; error: string }
+> {
   const supabase = await createClient()
 
   // 1. Look up the profile by the unique ID number (e.g., 1010)
