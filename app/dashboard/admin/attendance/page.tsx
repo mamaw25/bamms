@@ -56,11 +56,11 @@ export default async function AttendancePage() {
                     if (!dateString) return '--:--';
                     try {
                       const date = new Date(dateString);
-                      return date.toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit', 
-                        hour12: true 
-                      });
+                      const hours = date.getHours();
+                      const minutes = String(date.getMinutes()).padStart(2, '0');
+                      const ampm = hours >= 12 ? 'PM' : 'AM';
+                      const displayHours = hours % 12 || 12;
+                      return `${displayHours}:${minutes} ${ampm}`;
                     } catch {
                       return '--:--';
                     }

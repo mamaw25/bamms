@@ -109,7 +109,7 @@ export default async function AdminReportingPage({
                             OUT: {formatTimeForServer(row.clock_out)}
                           </div>
                         ) : (
-                          <div className="text-[10px] font-black text-green-500 animate-pulse mt-1 tracking-tighter">● ON SITE</div>
+                          <div className="text-[10px] font-black text-green-500 mt-1 tracking-tighter">● ON SITE</div>
                         )}
                       </td>
                       <td className="px-6 py-4 font-mono font-bold text-gray-700">{row.duration}</td>

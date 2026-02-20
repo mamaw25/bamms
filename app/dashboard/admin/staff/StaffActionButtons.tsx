@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Edit2, Trash2 } from 'lucide-react';
 import { deleteStaff } from '../action';
 
@@ -17,13 +18,23 @@ export function StaffActionButtons({
   lastName, 
   uniqueId 
 }: ActionButtonsProps) {
+  const router = useRouter();
+
   const handleDelete = async () => {
     if (confirm(`Are you sure you want to delete ${firstName} ${lastName}?`)) {
       try {
-        await deleteStaff(staffId);
-        window.location.reload();
+        const result = await deleteStaff(staffId);
+        if (result.success) {
+          alert('Staff member deleted successfully');
+          // Reload the page to refresh the server data
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        }
       } catch (error) {
-        alert('Failed to delete staff member');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to delete staff member';
+        console.error('Delete error:', error);
+        alert(`Error: ${errorMessage}`);
       }
     }
   };

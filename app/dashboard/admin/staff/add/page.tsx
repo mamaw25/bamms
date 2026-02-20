@@ -2,10 +2,12 @@
 
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AddStaffPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -60,7 +62,7 @@ export default function AddStaffPage() {
 
       setSuccess(true);
       setTimeout(() => {
-        window.location.href = '/dashboard/admin/staff';
+        router.push('/dashboard/admin/staff');
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -100,25 +102,25 @@ export default function AddStaffPage() {
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
-                First Name *
+                First Name <span className="text-red-600">*</span>
               </label>
               <input
                 type="text"
                 name="firstName"
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                 placeholder="John"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
-                Last Name *
+                Last Name <span className="text-red-600">*</span>
               </label>
               <input
                 type="text"
                 name="lastName"
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                 placeholder="Doe"
               />
             </div>
@@ -126,40 +128,40 @@ export default function AddStaffPage() {
 
           <div>
             <label className="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
-              Email Address *
+              Email Address <span className="text-red-600">*</span>
             </label>
             <input
               type="email"
               name="email"
               required
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
               placeholder="john.doe@example.com"
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
-              Unique ID Number *
+              Unique ID Number <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
               name="uniqueId"
               required
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
               placeholder="EMP001"
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
-              Password *
+              Password <span className="text-red-600">*</span>
             </label>
             <input
               type="password"
               name="password"
               required
               minLength={6}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
               placeholder="Minimum 6 characters"
             />
           </div>
@@ -170,7 +172,7 @@ export default function AddStaffPage() {
             </label>
             <select
               name="role"
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 bg-white"
             >
               <option value="staff">Staff</option>
               <option value="admin">Admin</option>

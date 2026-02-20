@@ -31,25 +31,55 @@ export async function signUp(formData: FormData) {
     })
 
     if (authError || !authData.user) {
+      console.error('Auth creation error:', authError)
       return { success: false, error: authError?.message || "Auth failed" }
     }
 
-    const { error: profileError } = await supabase
+    // Get the highest unique_id_number to continue the sequence
+    const { data: existingProfiles, error: fetchError } = await supabase
+      .from('profiles')
+      .select('unique_id_number')
+      .order('unique_id_number', { ascending: false })
+      .limit(1);
+
+    let nextId = 1000; // Default starting ID
+    if (!fetchError && existingProfiles && existingProfiles.length > 0) {
+      const lastId = parseInt(existingProfiles[0].unique_id_number, 10);
+      if (!isNaN(lastId)) {
+        nextId = lastId + 1;
+      }
+    }
+
+    const unique_id_number = nextId.toString();
+
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .insert({
         id: authData.user.id,
         email: email.trim(),
         first_name,
         last_name,
+        unique_id_number: unique_id_number,
         role: userRole 
       })
+      .select()
 
-    if (profileError) return { success: false, error: "Profile creation failed" }
+    if (profileError) {
+      console.error('Profile creation error:', profileError);
+      // Optionally delete the auth user if profile creation fails
+      try {
+        await supabase.auth.admin.deleteUser(authData.user.id);
+        console.log('Cleanup: Deleted auth user due to profile creation failure');
+      } catch (cleanup_error) {
+        console.error('Cleanup error:', cleanup_error);
+      }
+      return { success: false, error: `Profile creation failed: ${profileError.message}` }
+    }
 
     return { success: true, error: null }
   } catch (error) {
     console.error('Sign up error:', error)
-    return { success: false, error: "An unexpected error occurred" }
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" }
   }
 }
 

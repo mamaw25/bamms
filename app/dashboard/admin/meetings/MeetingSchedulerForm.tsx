@@ -87,7 +87,7 @@ export default function MeetingSchedulerForm({ onSuccess }: { onSuccess: () => v
                   type="text"
                   name="title"
                   placeholder="e.g., Monthly Barangay Assembly"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                   required
                 />
               </div>
@@ -98,7 +98,7 @@ export default function MeetingSchedulerForm({ onSuccess }: { onSuccess: () => v
                   <input
                     type="date"
                     name="date"
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                     required
                   />
                 </div>
@@ -107,7 +107,7 @@ export default function MeetingSchedulerForm({ onSuccess }: { onSuccess: () => v
                   <input
                     type="time"
                     name="time"
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                     required
                   />
                 </div>
@@ -117,7 +117,7 @@ export default function MeetingSchedulerForm({ onSuccess }: { onSuccess: () => v
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-widest mb-2">Venue</label>
                 <select
                   name="venue"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
                   required
                 >
                   <option value="">Select a venue</option>
@@ -136,7 +136,7 @@ export default function MeetingSchedulerForm({ onSuccess }: { onSuccess: () => v
                   name="agenda"
                   placeholder="List the main topics to be discussed..."
                   rows={4}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-900"
                   required
                 />
               </div>

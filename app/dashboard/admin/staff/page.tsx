@@ -4,6 +4,8 @@ import { Users, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { StaffActionButtons } from './StaffActionButtons';
 
+export const revalidate = 0;
+
 export default async function StaffManagementPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -27,6 +29,8 @@ export default async function StaffManagementPage() {
     .neq('role', 'admin')
     .order('first_name', { ascending: true });
 
+  const staffList = staffMembers || [];
+
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-sans">
       {/* Header Section */}
@@ -42,7 +46,7 @@ export default async function StaffManagementPage() {
         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-3 text-blue-600 font-bold uppercase tracking-widest text-[10px]">
             <Users size={20} />
-            <h2>Staff Members ({staffMembers?.length || 0})</h2>
+            <h2>Staff Members ({staffList.length})</h2>
           </div>
           <Link href="/dashboard/admin/staff/add">
             <button className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
@@ -51,7 +55,7 @@ export default async function StaffManagementPage() {
           </Link>
         </div>
 
-        {staffMembers && staffMembers.length > 0 ? (
+        {staffList.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
@@ -63,9 +67,9 @@ export default async function StaffManagementPage() {
                   <th className="px-6 py-4 text-center text-[10px] font-bold text-gray-600 uppercase tracking-widest">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                {staffMembers.map((staff) => (
-                  <tr key={staff.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+              <tbody suppressHydrationWarning>
+                {staffList.map((staff) => (
+                  <tr key={staff.id} className="border-b border-gray-200 hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <p className="font-bold text-gray-900">{staff.first_name} {staff.last_name}</p>
                     </td>

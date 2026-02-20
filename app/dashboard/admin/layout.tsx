@@ -1,8 +1,27 @@
 import Link from 'next/link';
 import { Users, ClipboardList, LogOut, LayoutDashboard, Calendar } from 'lucide-react';
 import { signOut } from '@/app/register/action';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export const revalidate = 0;
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Protect the route - only admins can access
+  if (!user) redirect('/login?role=admin');
+  
+  // Fetch admin profile to check role
+  const { data: adminProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+    
+  if (adminProfile?.role !== 'admin') redirect('/dashboard');
+
   // Bind the signout to redirect to the Blue Portal (Admin Login)
   const logoutAction = signOut.bind(null, '/login?role=admin');
 

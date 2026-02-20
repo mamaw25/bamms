@@ -40,6 +40,10 @@ export async function updateSession(request: NextRequest) {
   if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    // Preserve the admin role indicator if accessing /dashboard/admin
+    if (request.nextUrl.pathname.startsWith('/dashboard/admin')) {
+      url.searchParams.set('role', 'admin')
+    }
     return NextResponse.redirect(url)
   }
 

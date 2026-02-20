@@ -142,40 +142,40 @@ export default function EditStaffPage({
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
-                First Name *
+                First Name <span className="text-red-600">*</span>
               </label>
               <input
                 type="text"
                 name="firstName"
                 defaultValue={staff.first_name}
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
-                Last Name *
+                Last Name <span className="text-red-600">*</span>
               </label>
               <input
                 type="text"
                 name="lastName"
                 defaultValue={staff.last_name}
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
-              Email Address *
+              Email Address <span className="text-red-600">*</span>
             </label>
             <input
               type="email"
               name="email"
               defaultValue={staff.email}
               required
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
             />
           </div>
 
@@ -186,7 +186,7 @@ export default function EditStaffPage({
             <select
               name="role"
               defaultValue={staff.role || 'staff'}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 bg-white"
             >
               <option value="staff">Staff</option>
               <option value="admin">Admin</option>

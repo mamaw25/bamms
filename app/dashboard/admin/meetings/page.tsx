@@ -101,14 +101,16 @@ export default function MeetingsDashboard() {
       );
     });
 
-    const upcomingMeetings = meetings.filter((m) => new Date(m.date) > now);
-    const nextMeeting = upcomingMeetings.sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    )[0];
+    const upcomingMeetings = meetings.filter((m) => {
+      const meetingDateTime = new Date(`${m.date}T${m.time}`);
+      return meetingDateTime >= now && m.status === 'Scheduled';
+    }).sort(
+      (a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime()
+    );
 
     return {
       totalThisMonth: thisMonthMeetings.length,
-      nextMeeting,
+      upcomingMeetings,
     };
   };
 
@@ -145,16 +147,19 @@ export default function MeetingsDashboard() {
             <div className="p-3 bg-amber-100 rounded-xl">
               <Clock className="text-amber-600" size={24} />
             </div>
-            <div>
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Next Session</p>
-              {stats.nextMeeting ? (
-                <>
-                  <p className="text-lg font-black text-gray-900">{stats.nextMeeting.title}</p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(stats.nextMeeting.date).toLocaleDateString()} at{' '}
-                    {stats.nextMeeting.time}
-                  </p>
-                </>
+            <div className="flex-1">
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Upcoming Sessions</p>
+              {stats.upcomingMeetings && stats.upcomingMeetings.length > 0 ? (
+                <div className="space-y-2">
+                  {stats.upcomingMeetings.map((meeting) => (
+                    <div key={meeting.id} className="text-sm">
+                      <p className="font-bold text-gray-900">{meeting.title}</p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(meeting.date).toLocaleDateString()} at {meeting.time}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <p className="text-sm text-gray-400">No upcoming meetings</p>
               )}
