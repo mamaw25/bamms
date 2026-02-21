@@ -19,6 +19,7 @@ interface Meeting {
   agenda: string;
   status: 'Scheduled' | 'Completed' | 'Cancelled';
   created_at: string;
+  completed_at?: string | null;
 }
 
 interface StaffMember {
@@ -210,7 +211,7 @@ export default function MeetingsDashboard() {
             {/* Content */}
             <div className="p-6 space-y-6">
               {/* Meeting Info Grid */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
                   <div className="flex items-center gap-2 text-gray-600 mb-1">
                     <Calendar size={16} />
@@ -223,9 +224,16 @@ export default function MeetingsDashboard() {
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
                   <div className="flex items-center gap-2 text-gray-600 mb-1">
                     <Clock size={16} />
-                    <p className="text-xs font-bold uppercase tracking-widest">Time</p>
+                    <p className="text-xs font-bold uppercase tracking-widest">Meeting Started at</p>
                   </div>
-                  <p className="text-lg font-bold text-gray-900">{selectedMeeting.time}</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {new Date(`2000-01-01 ${selectedMeeting.time}`).toLocaleTimeString('en-PH', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      second: '2-digit',
+                      timeZone: 'Asia/Manila'
+                    })}
+                  </p>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
                   <div className="flex items-center gap-2 text-gray-600 mb-1">
@@ -234,6 +242,22 @@ export default function MeetingsDashboard() {
                   </div>
                   <p className="text-lg font-bold text-gray-900">{selectedMeeting.venue}</p>
                 </div>
+                {selectedMeeting.completed_at && (
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <div className="flex items-center gap-2 text-gray-600 mb-1">
+                      <Clock size={16} />
+                      <p className="text-xs font-bold uppercase tracking-widest">Meeting Ended at</p>
+                    </div>
+                    <p className="text-lg font-bold text-gray-900">
+                      {new Date(selectedMeeting.completed_at).toLocaleTimeString('en-PH', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        second: '2-digit',
+                        timeZone: 'Asia/Manila'
+                      })}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Agenda */}

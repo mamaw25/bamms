@@ -79,9 +79,15 @@ export async function updateMeeting(id: string, data: UpdateMeetingData) {
   const supabase = await createClient();
   
   try {
+    // If status is being set to 'Completed', add completed_at timestamp
+    const updateData = { ...data };
+    if (data.status === 'Completed') {
+      updateData.completed_at = new Date().toISOString();
+    }
+    
     const { error } = await supabase
       .from('meetings')
-      .update(data)
+      .update(updateData)
       .eq('id', id);
 
     if (error) throw error;
@@ -194,10 +200,10 @@ export async function getMeetingAttendees(meetingId: string) {
   const supabase = await createClient();
   
   try {
-    // First, get the meeting to know its date
+    // First, get the meeting to know its date and completed_at timestamp
     const { data: meeting, error: meetingError } = await supabase
       .from('meetings')
-      .select('date')
+      .select('date, completed_at, time')
       .eq('id', meetingId)
       .single();
 
@@ -206,10 +212,11 @@ export async function getMeetingAttendees(meetingId: string) {
       return { success: false, error: 'Meeting not found' };
     }
 
-    console.log('Meeting date:', meeting.date);
+    console.log('Meeting data:', meeting);
 
     // Get manually added attendees
-    const { data: manualAttendees, error: attendeesError } = await supabase
+    let manualAttendees = null;
+    const { data: initialAttendees, error: attendeesError } = await supabase
       .from('meeting_attendees')
       .select(`
         id,
@@ -227,6 +234,33 @@ export async function getMeetingAttendees(meetingId: string) {
 
     if (attendeesError) {
       console.error('Get Manual Attendees Error:', attendeesError.message);
+      // Try alternative query if the relationship doesn't exist
+      if (attendeesError.message.includes('relationship') || attendeesError.message.includes('staff_id')) {
+        console.log('Trying alternative query for manual attendees...');
+        const { data: altAttendees, error: altError } = await supabase
+          .from('meeting_attendees')
+          .select('*')
+          .eq('meeting_id', meetingId);
+        
+        if (!altError && altAttendees && altAttendees.length > 0) {
+          // Fetch profiles separately
+          const staffIds = altAttendees.map(a => a.staff_id);
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('*')
+            .in('id', staffIds);
+          
+          const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+          manualAttendees = altAttendees.map(a => ({
+            ...a,
+            profiles: profileMap.get(a.staff_id)
+          }));
+          
+          console.log('Alternative manual attendees:', manualAttendees);
+        }
+      }
+    } else {
+      manualAttendees = initialAttendees;
     }
 
     console.log('Manual attendees:', manualAttendees);
@@ -235,8 +269,10 @@ export async function getMeetingAttendees(meetingId: string) {
     const { data: checkedInStaff, error: checkinError } = await supabase
       .from('attendance')
       .select(`
+        id,
         profile_id,
-        profiles (
+        check_in,
+        profiles:profile_id (
           id,
           first_name,
           last_name,
@@ -251,7 +287,32 @@ export async function getMeetingAttendees(meetingId: string) {
       console.error('Get Check-in Error:', checkinError.message);
     }
 
-    console.log('Checked-in staff:', checkedInStaff);
+    console.log('Checked-in staff from DB:', checkedInStaff);
+    console.log('Meeting completed_at:', meeting.completed_at);
+
+    // Filter check-ins based on completion time
+    // Since we're generating a report for a completed meeting,
+    // include all check-ins from that meeting date
+    let filteredCheckedInStaff = checkedInStaff || [];
+    
+    if (meeting.completed_at) {
+      // Ensure both timestamps are in UTC for proper comparison
+      const completedTime = new Date(`${meeting.completed_at}Z`).getTime();
+      console.log('Completion timestamp:', completedTime, 'ISO:', new Date(completedTime).toISOString());
+      
+      // Filter to only include check-ins BEFORE the meeting was marked as completed
+      filteredCheckedInStaff = filteredCheckedInStaff.filter((record) => {
+        const checkInTime = new Date(record.check_in).getTime();
+        const isBeforeCompletion = checkInTime < completedTime;
+        console.log(`Check-in: ${record.check_in} (${checkInTime}), Before completion: ${isBeforeCompletion}`);
+        return isBeforeCompletion;
+      });
+    } else {
+      // If meeting is not completed yet, include all check-ins from that day
+      console.log('Meeting not completed yet, including all check-ins from today');
+    }
+    
+    console.log('Filtered checked-in staff count:', filteredCheckedInStaff.length);
 
     // Combine and deduplicate: manual attendees + checked-in staff
     const staffIds = new Set<string>();
@@ -261,21 +322,23 @@ export async function getMeetingAttendees(meetingId: string) {
     if (manualAttendees && Array.isArray(manualAttendees)) {
       manualAttendees.forEach((attendee) => {
         const profile = Array.isArray(attendee.profiles) ? attendee.profiles[0] : attendee.profiles;
-        staffIds.add(attendee.staff_id);
-        allAttendees.push({
-          id: attendee.id,
-          staff_id: attendee.staff_id,
-          profiles: profile,
-          type: 'manual',
-        });
+        if (profile) {
+          staffIds.add(attendee.staff_id);
+          allAttendees.push({
+            id: attendee.id,
+            staff_id: attendee.staff_id,
+            profiles: profile,
+            type: 'manual',
+          });
+        }
       });
     }
 
     // Add checked-in staff (avoid duplicates)
-    if (checkedInStaff && Array.isArray(checkedInStaff)) {
-      checkedInStaff.forEach((record) => {
+    if (filteredCheckedInStaff && Array.isArray(filteredCheckedInStaff)) {
+      filteredCheckedInStaff.forEach((record) => {
         const profile = Array.isArray(record.profiles) ? record.profiles[0] : record.profiles;
-        if (!staffIds.has(record.profile_id)) {
+        if (profile && !staffIds.has(record.profile_id)) {
           staffIds.add(record.profile_id);
           allAttendees.push({
             id: `checkin_${record.profile_id}`,

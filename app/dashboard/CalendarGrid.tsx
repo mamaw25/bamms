@@ -74,17 +74,24 @@ export default function CalendarGrid({
           const leaveStatus = getLeaveStatus(day);
           const isToday = day === now.getDate();
           const hasClockInOut = details && leaveStatus;
+          const dateObj = new Date(now.getFullYear(), now.getMonth(), day);
+          const isPastDate = dateObj < now && day !== now.getDate();
+          const isAbsentPastDate = isPastDate && !details && !leaveStatus;
 
           return (
             <button 
               key={day}
               onClick={() => setSelectedDate(day)}
               className={`h-14 border-2 rounded-md flex flex-col items-center justify-center text-sm transition relative z-10
-                ${leaveStatus ? (leaveStatus.status === 'rejected' ? 'border-red-500 bg-red-100' : leaveStatus.request_type === 'day_off' ? 'border-purple-400 bg-purple-50' : leaveStatus.request_type === 'absent' ? 'border-red-400 bg-red-50' : 'border-amber-400 bg-amber-50') : isToday ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}
+                ${isAbsentPastDate ? 'border-gray-400 bg-gray-50' : leaveStatus ? (leaveStatus.status === 'rejected' ? 'border-red-500 bg-red-100' : leaveStatus.request_type === 'day_off' ? 'border-purple-400 bg-purple-50' : leaveStatus.request_type === 'absent' ? 'border-red-400 bg-red-50' : 'border-amber-400 bg-amber-50') : isToday ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}
                 hover:shadow-md active:scale-95`}
             >
-              <span className={`font-semibold text-xs ${leaveStatus ? (leaveStatus.status === 'rejected' ? 'text-red-700 line-through font-bold' : leaveStatus.request_type === 'day_off' ? 'text-purple-700' : leaveStatus.request_type === 'absent' ? 'text-red-700' : 'text-amber-700') : isToday ? 'text-blue-700' : 'text-gray-700'}`}>{day}</span>
-              {leaveStatus ? (
+              <span className={`font-semibold text-xs ${isAbsentPastDate ? 'text-gray-600' : leaveStatus ? (leaveStatus.status === 'rejected' ? 'text-red-700 line-through font-bold' : leaveStatus.request_type === 'day_off' ? 'text-purple-700' : leaveStatus.request_type === 'absent' ? 'text-red-700' : 'text-amber-700') : isToday ? 'text-blue-700' : 'text-gray-700'}`}>{day}</span>
+              {isAbsentPastDate ? (
+                <>
+                  <span className="text-xs font-bold text-gray-500 mt-0.5">✕</span>
+                </>
+              ) : leaveStatus ? (
                 <>
                   <div className={`w-1.5 h-1.5 rounded-full mt-1 ${leaveStatus.status === 'rejected' ? 'bg-red-500' : leaveStatus.request_type === 'day_off' ? 'bg-purple-500' : leaveStatus.request_type === 'absent' ? 'bg-red-500' : 'bg-amber-500'}`} />
                   {leaveStatus.status === 'rejected' && (
@@ -118,7 +125,26 @@ export default function CalendarGrid({
                 {now.toLocaleString('default', { month: 'long' })} {selectedDate}, {now.getFullYear()}
               </p>
               
-              {getLeaveStatus(selectedDate) ? (
+              {(() => {
+                const dateObj = new Date(now.getFullYear(), now.getMonth(), selectedDate);
+                const isPastDate = dateObj < now && selectedDate !== now.getDate();
+                const isAbsentPastDate = isPastDate && !getDayDetails(selectedDate) && !getLeaveStatus(selectedDate);
+                
+                if (isAbsentPastDate) {
+                  return (
+                    <div className="p-4 rounded-xl bg-gray-100 text-gray-700 border border-gray-300 flex flex-col gap-3">
+                      <div className="flex items-center gap-2 font-bold text-lg">
+                        <span>⚠️</span>
+                        <span>No Attendance</span>
+                      </div>
+                      <p className="text-sm">You were not present on this date and have no approved leave or day-off request.</p>
+                    </div>
+                  );
+                }
+                
+                return (
+                  <>
+                    {getLeaveStatus(selectedDate) ? (
                 <div>
                   {(() => {
                     const leave = getLeaveStatus(selectedDate)!;
@@ -228,6 +254,9 @@ export default function CalendarGrid({
                   <XCircle size={18}/> No Record
                 </div>
               )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
