@@ -4,13 +4,15 @@ import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { addStaffMember } from './action';
 
 export default function AddStaffPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [verificationToken, setVerificationToken] = useState<string | null>(null);
+  const [staffEmail, setStaffEmail] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,52 +20,18 @@ export default function AddStaffPage() {
     setError('');
 
     const formData = new FormData(e.currentTarget);
-    const firstName = formData.get('firstName') as string;
-    const lastName = formData.get('lastName') as string;
-    const email = formData.get('email') as string;
-    const uniqueId = formData.get('uniqueId') as string;
-    const password = formData.get('password') as string;
-    const role = formData.get('role') as string;
 
     try {
-      const supabase = createClient();
+      const result = await addStaffMember(formData);
 
-      // 1. Create the auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (authError) {
-        throw new Error(authError.message);
+      if (result.success) {
+        setSuccess(true);
+        setVerificationToken(result.verification_token || null);
+        setStaffEmail(formData.get('email') as string);
+      } else {
+        setError(result.error || 'An error occurred');
+        setLoading(false);
       }
-
-      if (!authData.user?.id) {
-        throw new Error('Failed to create user');
-      }
-
-      // 2. Create the profile record
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          first_name: firstName,
-          last_name: lastName,
-          email,
-          unique_id_number: uniqueId,
-          role: role || 'staff',
-        });
-
-      if (profileError) {
-        // Cleanup: delete the auth user if profile creation fails
-        await supabase.auth.admin.deleteUser(authData.user.id);
-        throw new Error('Failed to create staff profile');
-      }
-
-      setSuccess(true);
-      setTimeout(() => {
-        router.push('/dashboard/admin/staff');
-      }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);
@@ -94,7 +62,40 @@ export default function AddStaffPage() {
 
         {success && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-600 font-semibold text-sm">Staff member created successfully! Redirecting...</p>
+            <p className="text-green-600 font-semibold text-sm mb-3">Staff member created successfully! A verification email has been sent to {staffEmail}</p>
+            {verificationToken && (
+              <details className="text-sm">
+                <summary className="text-green-700 font-semibold cursor-pointer hover:text-green-800">
+                  📧 Show verification link
+                </summary>
+                <div className="mt-2 pt-2 border-t border-green-300">
+                  <p className="text-green-700 text-xs mb-2">Share this link with the staff member to verify their email:</p>
+                  <div className="bg-white p-2 rounded border border-green-300">
+                    <code className="text-blue-600 text-xs break-all">
+                      {`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`}
+                    </code>
+                  </div>
+                </div>
+              </details>
+            )}
+            <div className="flex gap-3 mt-4 pt-3 border-t border-green-300">
+              <button
+                onClick={() => router.push('/dashboard/admin/staff')}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold text-sm uppercase transition-all"
+              >
+                Back to Staff List
+              </button>
+              <button
+                onClick={() => {
+                  setSuccess(false);
+                  setVerificationToken(null);
+                  setStaffEmail(null);
+                }}
+                className="flex-1 bg-slate-300 hover:bg-slate-400 text-slate-700 px-4 py-2 rounded font-bold text-sm uppercase transition-all"
+              >
+                Add Another Staff
+              </button>
+            </div>
           </div>
         )}
 

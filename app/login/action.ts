@@ -19,15 +19,23 @@ export async function login(formData: FormData) {
     return { success: false, error: authError?.message || "Invalid credentials" }
   }
 
-  // 2. Fetch profile to check role
+  // 2. Fetch profile to check role and email verification status
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, email_verified')
     .eq('id', authData.user.id)
     .single()
 
   if (profileError || !profile) {
     return { success: false, error: "Profile not found." }
+  }
+
+  // 3. Check if email is verified
+  if (!profile.email_verified) {
+    return { 
+      success: false, 
+      error: "Please verify your email address before logging in. Check your inbox for the verification link."
+    }
   }
 
    // If database says 'admin' -> go to /dashboard/admin

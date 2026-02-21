@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@supabase/supabase-js'
+import { generateVerificationToken, getTokenExpirationTime, sendVerificationEmail } from '@/lib/email/emailService'
 
 async function createAdminClient() {
   return createClient(
@@ -22,11 +23,15 @@ export async function signUp(formData: FormData) {
   const SECRET_ADMIN_PASS = "ADMIN123"; 
   const userRole = adminCode === SECRET_ADMIN_PASS ? 'admin' : 'staff';
 
+  // Generate verification token
+  const verificationToken = generateVerificationToken();
+  const tokenExpiresAt = getTokenExpirationTime();
+
   try {
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: email.trim(),
       password,
-      email_confirm: true,
+      email_confirm: false, // Don't auto-confirm - require email verification
       user_metadata: { first_name, last_name, role: userRole }
     })
 
@@ -52,7 +57,7 @@ export async function signUp(formData: FormData) {
 
     const unique_id_number = nextId.toString();
 
-    const { data: profileData, error: profileError } = await supabase
+    const { error: profileError } = await supabase
       .from('profiles')
       .insert({
         id: authData.user.id,
@@ -60,7 +65,10 @@ export async function signUp(formData: FormData) {
         first_name,
         last_name,
         unique_id_number: unique_id_number,
-        role: userRole 
+        role: userRole,
+        email_verified: false, // Set email as not verified initially
+        email_verification_token: verificationToken,
+        email_verification_token_expires_at: tokenExpiresAt.toISOString()
       })
       .select()
 
@@ -76,7 +84,13 @@ export async function signUp(formData: FormData) {
       return { success: false, error: `Profile creation failed: ${profileError.message}` }
     }
 
-    return { success: true, error: null }
+    // Send verification email
+    const emailResult = await sendVerificationEmail(email.trim(), first_name, verificationToken);
+    if (!emailResult.success) {
+      console.warn('Email send warning:', emailResult.message);
+    }
+
+    return { success: true, error: null, verification_sent: true, verification_token: verificationToken }
   } catch (error) {
     console.error('Sign up error:', error)
     return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" }

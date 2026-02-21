@@ -65,6 +65,18 @@ export default async function AttendancePage() {
                       return '--:--';
                     }
                   };
+
+                  const formatDate = (dateString: string) => {
+                    try {
+                      const date = new Date(dateString);
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                      const day = String(date.getDate()).padStart(2, '0');
+                      return `${month}/${day}/${year}`;
+                    } catch {
+                      return dateString;
+                    }
+                  };
                   
                   const clockInTime = formatTime(record.check_in);
                   const clockOutTime = formatTime(record.clock_out);
@@ -79,7 +91,7 @@ export default async function AttendancePage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
                           <Calendar size={14} />
-                          {new Date(record.date).toLocaleDateString()}
+                          {formatDate(record.date)}
                         </div>
                       </td>
                       <td className="px-6 py-4">
