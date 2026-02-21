@@ -68,7 +68,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="pt-6 border-t border-white/10">
           <form action={logoutAction}>
             <button 
-              type="submit" 
+              type="submit"
+              suppressHydrationWarning
               className="w-full flex items-center gap-3 p-3 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all group"
             >
               <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />

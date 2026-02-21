@@ -4,7 +4,8 @@ import { User, Calendar as CalendarIcon, LogOut, CheckCircle } from 'lucide-reac
 import { signOut } from '@/app/login/action';
 import CalendarGrid from './CalendarGrid'; 
 import { clockIn, clockOut } from './actions'; 
-import ActionButton from './ActionButton'; 
+import ActionButton from './ActionButton';
+import LeaveRequestSection from './components/LeaveRequestSection'; 
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -25,6 +26,13 @@ export default async function DashboardPage() {
     .select('*')
     .eq('profile_id', user.id)
     .order('date', { ascending: false });
+
+  // Fetch approved and rejected leave requests for this staff
+  const { data: leaveRequests } = await supabase
+    .from('leave_requests')
+    .select('*')
+    .eq('staff_id', user.id)
+    .in('status', ['approved', 'rejected']);
 
   // Logic to determine attendance state
   const activeRecord = attendance?.find(record => record.clock_out === null);
@@ -50,7 +58,11 @@ export default async function DashboardPage() {
           <p className="text-sm text-gray-500">Welcome back, {profile?.first_name}!</p>
         </div>
         <form action={signOut}>
-          <button type="submit" className="flex items-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg font-medium transition">
+          <button 
+            type="submit"
+            suppressHydrationWarning
+            className="flex items-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg font-medium transition"
+          >
             <LogOut size={18} /> Sign Out
           </button>
         </form>
@@ -122,9 +134,15 @@ export default async function DashboardPage() {
           <CalendarGrid 
             daysInMonth={daysInMonth} 
             firstDayOfMonth={firstDayOfMonth} 
-            attendanceData={attendance || []} 
+            attendanceData={attendance || []}
+            leaveRequests={leaveRequests || []}
           />
         </div>
+      </div>
+
+      {/* Leave Request Section */}
+      <div className="mt-8">
+        <LeaveRequestSection staffId={user.id} />
       </div>
     </div>
   );

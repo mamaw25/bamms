@@ -1,35 +1,55 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import { Users, Plus } from 'lucide-react';
-import Link from 'next/link';
-import { StaffActionButtons } from './StaffActionButtons';
+'use client'
 
-export const revalidate = 0;
+import { useState, useEffect } from 'react'
+import { Users, Plus, Calendar } from 'lucide-react'
+import Link from 'next/link'
+import { StaffActionButtons } from './StaffActionButtons'
+import LeaveRequestsManagement from './LeaveRequestsManagement'
+import { createClient } from '@supabase/supabase-js'
 
-export default async function StaffManagementPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+interface StaffMember {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  unique_id_number: string
+  role: string
+}
 
-  // Protect the route - only admins can access
-  if (!user) redirect('/login');
-  
-  // Fetch admin profile to check role
-  const { data: adminProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-    
-  if (adminProfile?.role !== 'admin') redirect('/dashboard');
+export default function StaffManagementPage() {
+  const [activeTab, setActiveTab] = useState<'staff' | 'leave'>('staff')
+  const [staffList, setStaffList] = useState<StaffMember[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Fetch all staff members
-  const { data: staffMembers } = await supabase
-    .from('profiles')
-    .select('*')
-    .neq('role', 'admin')
-    .order('first_name', { ascending: true });
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
 
-  const staffList = staffMembers || [];
+        const { data, error: fetchError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, email, unique_id_number, role')
+          .eq('role', 'staff')
+          .order('first_name', { ascending: true })
+
+        if (fetchError) {
+          setError(fetchError.message)
+        } else {
+          setStaffList(data || [])
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch staff')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStaff()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-sans">
@@ -41,13 +61,53 @@ export default async function StaffManagementPage() {
         </div>
       </header>
 
-      {/* Staff List Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-          <div className="flex items-center gap-3 text-blue-600 font-bold uppercase tracking-widest text-[10px]">
-            <Users size={20} />
-            <h2>Staff Members ({staffList.length})</h2>
+      {/* Tab Navigation */}
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 font-medium">Loading staff members...</p>
           </div>
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p className="text-red-700 font-medium">Error: {error}</p>
+        </div>
+      ) : (
+        <>
+      <div className="flex gap-2 mb-6 bg-white rounded-lg p-1 w-fit shadow-sm border border-gray-200">
+        <button
+          onClick={() => setActiveTab('staff')}
+          className={`flex items-center gap-2 px-4 py-2 rounded font-bold text-sm uppercase tracking-widest transition-all ${
+            activeTab === 'staff'
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-700 hover:text-gray-900'
+          }`}
+        >
+          <Users size={16} />
+          Staff Members
+        </button>
+        <button
+          onClick={() => setActiveTab('leave')}
+          className={`flex items-center gap-2 px-4 py-2 rounded font-bold text-sm uppercase tracking-widest transition-all ${
+            activeTab === 'leave'
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-700 hover:text-gray-900'
+          }`}
+        >
+          <Calendar size={16} />
+          Leave Requests
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'staff' ? (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+            <div className="flex items-center gap-3 text-blue-600 font-bold uppercase tracking-widest text-[10px]">
+              <Users size={20} />
+              <h2>Staff Members ({staffList.length})</h2>
+            </div>
           <Link href="/dashboard/admin/staff/add">
             <button className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
               <Plus size={16} /> Add Staff
@@ -104,6 +164,11 @@ export default async function StaffManagementPage() {
           </div>
         )}
       </div>
+      ) : (
+        <LeaveRequestsManagement />
+      )}
+        </>
+      )}
     </div>
-  );
+  )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react';
-import { X, Clock, CheckCircle2, XCircle, LogOut, Timer } from 'lucide-react';
+import { X, Clock, CheckCircle2, XCircle, LogOut, Timer, Calendar } from 'lucide-react';
 
 interface AttendanceRecord {
   id: string;
@@ -11,14 +11,26 @@ interface AttendanceRecord {
   clock_out?: string;
 }
 
+interface LeaveRequest {
+  id: string;
+  start_date: string;
+  end_date: string;
+  request_type: 'leave' | 'absent' | 'day_off';
+  reason?: string
+  admin_notes?: string
+  status: string
+}
+
 export default function CalendarGrid({ 
   daysInMonth, 
   firstDayOfMonth, 
-  attendanceData 
+  attendanceData,
+  leaveRequests = []
 }: { 
   daysInMonth: number, 
   firstDayOfMonth: number,
-  attendanceData: AttendanceRecord[] 
+  attendanceData: AttendanceRecord[],
+  leaveRequests?: LeaveRequest[]
 }) {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const now = new Date();
@@ -26,6 +38,14 @@ export default function CalendarGrid({
   const getDayDetails = (day: number) => {
     const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     return attendanceData.find(a => a.date === dateString);
+  };
+
+  const getLeaveStatus = (day: number) => {
+    const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const leave = leaveRequests.find(
+      req => (req.status === 'approved' || req.status === 'rejected') && dateString >= req.start_date && dateString <= req.end_date
+    );
+    return leave;
   };
 
   // Helper to calculate duration between two ISO strings
@@ -51,18 +71,32 @@ export default function CalendarGrid({
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const day = i + 1;
           const details = getDayDetails(day);
+          const leaveStatus = getLeaveStatus(day);
           const isToday = day === now.getDate();
+          const hasClockInOut = details && leaveStatus;
 
           return (
             <button 
               key={day}
               onClick={() => setSelectedDate(day)}
-              className={`h-14 border rounded-md flex flex-col items-center justify-center text-sm transition relative z-10
-                ${isToday ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}
-                hover:border-blue-400 hover:shadow-md active:scale-95`}
+              className={`h-14 border-2 rounded-md flex flex-col items-center justify-center text-sm transition relative z-10
+                ${leaveStatus ? (leaveStatus.status === 'rejected' ? 'border-red-500 bg-red-100' : leaveStatus.request_type === 'day_off' ? 'border-purple-400 bg-purple-50' : leaveStatus.request_type === 'absent' ? 'border-red-400 bg-red-50' : 'border-amber-400 bg-amber-50') : isToday ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}
+                hover:shadow-md active:scale-95`}
             >
-              <span className={`font-semibold ${isToday ? 'text-blue-700' : 'text-gray-700'}`}>{day}</span>
-              {details && (
+              <span className={`font-semibold text-xs ${leaveStatus ? (leaveStatus.status === 'rejected' ? 'text-red-700 line-through font-bold' : leaveStatus.request_type === 'day_off' ? 'text-purple-700' : leaveStatus.request_type === 'absent' ? 'text-red-700' : 'text-amber-700') : isToday ? 'text-blue-700' : 'text-gray-700'}`}>{day}</span>
+              {leaveStatus ? (
+                <>
+                  <div className={`w-1.5 h-1.5 rounded-full mt-1 ${leaveStatus.status === 'rejected' ? 'bg-red-500' : leaveStatus.request_type === 'day_off' ? 'bg-purple-500' : leaveStatus.request_type === 'absent' ? 'bg-red-500' : 'bg-amber-500'}`} />
+                  {leaveStatus.status === 'rejected' && (
+                    <span className="text-xs font-bold text-red-600 mt-0.5">✕</span>
+                  )}
+                  {hasClockInOut && (
+                    <span className={`absolute top-1 right-1 text-xs font-bold px-1.5 py-0.5 rounded-full border ${details?.clock_out ? 'bg-green-500 text-white border-green-600' : 'bg-orange-500 text-white border-orange-600'}`} title={details?.clock_out ? 'Clocked Out' : 'Clocked In'}>
+                      {details?.clock_out ? '✓' : '◐'}
+                    </span>
+                  )}
+                </>
+              ) : details && (
                 <div className={`w-1.5 h-1.5 rounded-full mt-1 ${details.status === 'present' ? 'bg-green-500' : 'bg-red-500'}`} />
               )}
             </button>
@@ -75,7 +109,7 @@ export default function CalendarGrid({
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[9999] p-4 backdrop-blur-sm" onClick={() => setSelectedDate(null)}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800">Attendance Details</h3>
+              <h3 className="text-xl font-bold text-gray-800">Day Details</h3>
               <button onClick={() => setSelectedDate(null)} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
             </div>
             
@@ -84,7 +118,65 @@ export default function CalendarGrid({
                 {now.toLocaleString('default', { month: 'long' })} {selectedDate}, {now.getFullYear()}
               </p>
               
-              {getDayDetails(selectedDate) ? (
+              {getLeaveStatus(selectedDate) ? (
+                <div>
+                  {(() => {
+                    const leave = getLeaveStatus(selectedDate)!;
+                    if (leave.status === 'rejected') {
+                      return (
+                        <div className="p-4 rounded-xl border-2 border-red-500 bg-red-50 text-red-700">
+                          <div className="flex items-center gap-2 font-bold mb-3 text-lg text-red-600">
+                            <span>❌</span>
+                            <span>Request Rejected</span>
+                          </div>
+                          <div className="text-sm space-y-2">
+                            <div className="text-red-600">
+                              <p className="font-medium text-xs mb-1">Request Type:</p>
+                              <p className="font-semibold">{leave.request_type === 'day_off' ? 'Day Off' : leave.request_type === 'absent' ? 'Absent' : 'Leave'}</p>
+                            </div>
+                            {leave.reason && (
+                              <div className="bg-white p-2 rounded border-l-4 border-red-400">
+                                <p className="font-medium text-gray-600 text-xs mb-1">Your Reason:</p>
+                                <p className="text-gray-700">{leave.reason}</p>
+                              </div>
+                            )}
+                            {leave.admin_notes && (
+                              <div className="bg-white p-2 rounded border-l-4 border-red-500 border-l-4">
+                                <p className="font-bold text-red-600 text-xs mb-1">⚠️ Rejection Reason:</p>
+                                <p className="text-gray-700">{leave.admin_notes}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                    const bgColor = leave.request_type === 'day_off' ? 'bg-purple-50 border-purple-100 text-purple-700' : leave.request_type === 'absent' ? 'bg-red-50 border-red-100 text-red-700' : 'bg-amber-50 border-amber-100 text-amber-700';
+                    const icon = leave.request_type === 'day_off' ? '🗓️' : leave.request_type === 'absent' ? '❌' : '🏖️';
+                    const label = leave.request_type === 'day_off' ? 'Day Off' : leave.request_type === 'absent' ? 'Absent' : 'Leave';
+                    
+                    return (
+                      <div className={`p-4 rounded-xl border ${bgColor}`}>
+                        <div className="flex items-center gap-2 font-bold mb-3">
+                          <span>{icon}</span>
+                          <span>{label} (Approved)</span>
+                        </div>
+                        {leave.reason && (
+                          <div className="text-sm opacity-90 bg-white/40 p-2 rounded mb-2">
+                            <p className="font-medium text-gray-600 text-xs mb-1">Reason:</p>
+                            <p>{leave.reason}</p>
+                          </div>
+                        )}
+                        {leave.admin_notes && (
+                          <div className="text-sm opacity-90 bg-white/40 p-2 rounded">
+                            <p className="font-medium text-gray-600 text-xs mb-1">Admin Notes:</p>
+                            <p>{leave.admin_notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : getDayDetails(selectedDate) ? (
                 <div className="space-y-4">
                   <div className="p-4 rounded-xl bg-green-50 text-green-700 border border-green-100">
                     <div className="flex items-center gap-2 font-bold mb-3">
