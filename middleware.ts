@@ -6,48 +6,63 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>) {
-          cookiesToSet.forEach(({ name, value }) => 
-            request.cookies.set(name, value)
-          )
-          
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
+  try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error('Missing Supabase environment variables in middleware');
+      return supabaseResponse;
     }
-  )
 
-  // Refreshes the session if it's expired
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>) {
+            cookiesToSet.forEach(({ name, value }) => 
+              request.cookies.set(name, value)
+            )
+            
+            supabaseResponse = NextResponse.next({
+              request,
+            })
 
-  // If no user and trying to access dashboard, send to login
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    // Preserve the admin role indicator if accessing /dashboard/admin
-    if (request.nextUrl.pathname.startsWith('/dashboard/admin')) {
-      url.searchParams.set('role', 'admin')
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
+
+    // Refreshes the session if it's expired
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      // If no user and trying to access dashboard, send to login
+      if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        // Preserve the admin role indicator if accessing /dashboard/admin
+        if (request.nextUrl.pathname.startsWith('/dashboard/admin')) {
+          url.searchParams.set('role', 'admin')
+        }
+        return NextResponse.redirect(url)
+      }
+    } catch (authError) {
+      console.error('Middleware auth check failed:', authError);
+      // Continue with the response even if auth check fails
     }
-    return NextResponse.redirect(url)
+
+    return supabaseResponse
+  } catch (error) {
+    console.error('Middleware error:', error);
+    return supabaseResponse;
   }
-
-  return supabaseResponse
 }
 
 export async function middleware(request: NextRequest) {
