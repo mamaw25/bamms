@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getMeetings, getMeetingAttendees } from './action';
+import { getMeetings } from './action';
 import { createClient } from '@/lib/supabase/client';
 import MeetingSchedulerForm from './MeetingSchedulerForm';
 import UpcomingMeetingsTable from './UpcomingMeetingsTable';
-import AttendeeTracker from './AttendeeTracker';
 import MeetingMinutesForm from './MeetingMinutesForm';
 import ExportMinutesButton from './ExportMinutesButton';
 import { Calendar, Clock, MapPin, X } from 'lucide-react';
@@ -31,18 +30,10 @@ interface StaffMember {
   role: string;
 }
 
-interface Attendee {
-  id: string;
-  staff_id: string;
-  profiles: StaffMember;
-  type?: 'manual' | 'auto_checkin';
-}
-
 export default function MeetingsDashboard() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
-  const [selectedAttendees, setSelectedAttendees] = useState<Attendee[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
@@ -81,12 +72,8 @@ export default function MeetingsDashboard() {
     fetchData();
   }, []);
 
-  const handleMeetingClick = async (meeting: Meeting) => {
+  const handleMeetingClick = (meeting: Meeting) => {
     setSelectedMeeting(meeting);
-    const result = await getMeetingAttendees(meeting.id);
-    if (result.success) {
-      setSelectedAttendees(result.data || []);
-    }
   };
 
   const calculateStats = () => {
@@ -270,16 +257,10 @@ export default function MeetingsDashboard() {
                 </div>
               </div>
 
-              {/* Attendees */}
-              <AttendeeTracker meetingId={selectedMeeting.id} staffList={staffList} />
-
               {/* Actions */}
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                 <MeetingMinutesForm meeting={selectedMeeting} onSuccess={loadData} />
-                <ExportMinutesButton
-                  meeting={selectedMeeting}
-                  attendees={selectedAttendees}
-                />
+                <ExportMinutesButton meeting={selectedMeeting} attendees={[]} />
               </div>
             </div>
           </div>

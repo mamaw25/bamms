@@ -44,7 +44,6 @@ export default function ExportMinutesButton({
   attendees: Attendee[];
 }) {
   const [minutes, setMinutes] = useState<MeetingMinutes | null>(null);
-  const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -52,26 +51,6 @@ export default function ExportMinutesButton({
       setIsLoading(true);
       
       try {
-        console.log('Fetching data for export, initialAttendees:', initialAttendees);
-        
-        // Try to use initialAttendees first if available
-        if (initialAttendees && initialAttendees.length > 0) {
-          console.log('Using initialAttendees from parent:', initialAttendees);
-          setAttendees(initialAttendees);
-        } else {
-          // Otherwise fetch fresh attendees for the export to ensure accuracy
-          console.log('Fetching attendees for meeting:', meeting.id);
-          const attendeesResult = await getMeetingAttendees(meeting.id);
-          console.log('Attendees result:', attendeesResult);
-          if (attendeesResult.success && attendeesResult.data) {
-            console.log('Setting attendees from fetch:', attendeesResult.data);
-            setAttendees(attendeesResult.data);
-          } else {
-            console.log('No attendees found in fetch');
-            setAttendees([]);
-          }
-        }
-        
         // Fetch minutes
         const minutesResult = await getMeetingMinutes(meeting.id);
         if (minutesResult.success) {
@@ -85,13 +64,10 @@ export default function ExportMinutesButton({
     };
 
     fetchData();
-  }, [meeting.id, initialAttendees]);
+  }, [meeting.id]);
 
   const handleExportPDF = () => {
-    console.log('Export button clicked');
-    console.log('Current attendees state:', attendees);
-    console.log('Attendees length:', attendees?.length);
-    const doc = generatePDFContent(meeting, attendees, minutes);
+    const doc = generatePDFContent(meeting, minutes);
     downloadPDF(doc, `meeting-minutes-${meeting.id}.txt`);
   };
 
@@ -106,9 +82,7 @@ export default function ExportMinutesButton({
   );
 }
 
-function generatePDFContent(meeting: Meeting, attendees: Attendee[], minutes: MeetingMinutes | null): string {
-  console.log('generatePDFContent called with attendees:', attendees);
-  
+function generatePDFContent(meeting: Meeting, minutes: MeetingMinutes | null): string {
   const date = new Date(meeting.date);
   const formattedDate = date.toLocaleDateString('en-US', {
     weekday: 'long',
@@ -137,22 +111,6 @@ function generatePDFContent(meeting: Meeting, attendees: Attendee[], minutes: Me
       })
     : 'Not ended yet';
 
-  const attendeesList = attendees && attendees.length > 0
-    ? attendees
-        .map((a) => {
-          if (!a.profiles) {
-            console.warn('Attendee missing profiles:', a);
-            return '';
-          }
-          const type = a.type === 'manual' ? '(Added Manually)' : '(Auto Check-in)';
-          return `• ${a.profiles.first_name} ${a.profiles.last_name} (${a.profiles.unique_id_number}) ${type}`;
-        })
-        .filter(line => line.length > 0)
-        .join('\n')
-    : 'No attendees recorded';
-
-  console.log('Attendees list generated:', attendeesList);
-
   return `
 ═══════════════════════════════════════════════════════════════════════════════
                         BARANGAY MEETING MINUTES
@@ -170,10 +128,6 @@ Status:           ${meeting.status}
 AGENDA
 ───────────────────────────────────────────────────────────────────────────────
 ${meeting.agenda}
-
-ATTENDEES
-───────────────────────────────────────────────────────────────────────────────
-${attendeesList}
 
 MEETING NOTES
 ───────────────────────────────────────────────────────────────────────────────

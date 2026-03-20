@@ -17,7 +17,6 @@ interface Attendee {
   id: string;
   staff_id: string;
   profiles: StaffMember;
-  type?: 'manual' | 'auto_checkin';
 }
 
 export default function AttendeeTracker({
@@ -135,47 +134,28 @@ export default function AttendeeTracker({
       ) : attendees.length > 0 ? (
         <div className="space-y-2">
           {attendees.map((attendee) => {
-            const isAutoCheckin = attendee.type === 'auto_checkin';
             const profile = Array.isArray(attendee.profiles) ? attendee.profiles[0] : attendee.profiles;
             
             return (
               <div
                 key={attendee.id}
-                className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                  isAutoCheckin 
-                    ? 'bg-green-50 border-green-200 hover:bg-green-100' 
-                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                }`}
+                className="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-gray-200 hover:bg-gray-100 transition-colors"
               >
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-sm text-gray-900">
-                      {profile.first_name} {profile.last_name}
-                    </p>
-                    {isAutoCheckin && (
-                      <span className="inline-block bg-green-200 text-green-800 text-xs font-bold px-2 py-0.5 rounded">
-                        Auto
-                      </span>
-                    )}
-                  </div>
+                  <p className="font-bold text-sm text-gray-900">
+                    {profile.first_name} {profile.last_name}
+                  </p>
                   <p className="text-xs text-gray-500">
                     ID: {profile.unique_id_number}
                   </p>
                 </div>
-                {!isAutoCheckin && (
-                  <button
-                    onClick={() => handleRemoveAttendee(attendee.id)}
-                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-2"
-                    title="Remove attendee"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-                {isAutoCheckin && (
-                  <span className="text-xs text-gray-400 ml-2 italic">
-                    (from check-in)
-                  </span>
-                )}
+                <button
+                  onClick={() => handleRemoveAttendee(attendee.id)}
+                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-2"
+                  title="Remove attendee"
+                >
+                  <X size={16} />
+                </button>
               </div>
             );
           })}

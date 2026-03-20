@@ -107,7 +107,7 @@ export default function KioskLandingPage() {
         </div>
       </div>
       
-      <p className="mt-8 text-slate-600 text-[9px] font-mono uppercase tracking-[0.4em] opacity-50">
+      <p className="mt-3 text-slate-600 text-[12px] font-mono uppercase tracking-[0.4em] opacity-100">
         Barangay Management System
       </p>
     </div>
