@@ -7,7 +7,8 @@ import MeetingSchedulerForm from './MeetingSchedulerForm';
 import UpcomingMeetingsTable from './UpcomingMeetingsTable';
 import MeetingMinutesForm from './MeetingMinutesForm';
 import ExportMinutesButton from './ExportMinutesButton';
-import { Calendar, Clock, MapPin, X } from 'lucide-react';
+import { useMeetingUpdates, useMeetingAttendeesUpdates } from '@/lib/realtime/hooks';
+import { Calendar, Clock, MapPin, X, RefreshCw } from 'lucide-react';
 
 interface Meeting {
   id: string;
@@ -32,9 +33,9 @@ interface StaffMember {
 
 export default function MeetingsDashboard() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasUpdates, setHasUpdates] = useState(false);
 
   const loadData = async () => {
     console.log('loadData called - refreshing meetings...');
@@ -59,11 +60,50 @@ export default function MeetingsDashboard() {
     
     if (staff) {
       console.log('Staff loaded:', staff.length, 'staff members');
-      setStaffList(staff);
     }
 
     setLoading(false);
   };
+
+  // Listen to meeting updates
+  useMeetingUpdates(
+    (record) => {
+      console.log('[MeetingsDashboard] Meeting updated:', record);
+      setHasUpdates(true);
+    },
+    (record) => {
+      console.log('[MeetingsDashboard] New meeting:', record);
+      setHasUpdates(true);
+    },
+    (record) => {
+      console.log('[MeetingsDashboard] Meeting deleted:', record);
+      setHasUpdates(true);
+    }
+  );
+
+  // Listen to meeting attendees updates
+  useMeetingAttendeesUpdates(
+    (record) => {
+      console.log('[MeetingsDashboard] Attendee updated:', record);
+      setHasUpdates(true);
+    },
+    (record) => {
+      console.log('[MeetingsDashboard] New attendee:', record);
+      setHasUpdates(true);
+    }
+  );
+
+  // Auto-refresh when updates arrive
+  useEffect(() => {
+    if (hasUpdates) {
+      const timer = setTimeout(() => {
+        console.log('[MeetingsDashboard] Auto-refreshing due to meeting changes');
+        loadData();
+        setHasUpdates(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [hasUpdates]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,11 +148,19 @@ export default function MeetingsDashboard() {
     <div className="space-y-8">
       {/* Header */}
       <header className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">Barangay Meetings</h1>
           <p className="text-sm text-gray-500 font-medium">Schedule and manage community meetings</p>
         </div>
-        <MeetingSchedulerForm onSuccess={loadData} />
+        <div className="flex items-center gap-3">
+          {hasUpdates && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+              <RefreshCw size={14} className="text-blue-600 animate-spin" />
+              <span className="text-xs font-medium text-blue-600">Updating...</span>
+            </div>
+          )}
+          <MeetingSchedulerForm onSuccess={loadData} />
+        </div>
       </header>
 
       {/* Info Cards */}

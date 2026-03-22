@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Calendar } from 'lucide-react'
 import LeaveRequestForm from './LeaveRequestForm'
+import { useLeaveRequestUpdates } from '@/lib/realtime/hooks'
 
 interface LeaveRequestSectionProps {
   staffId: string
@@ -11,6 +12,31 @@ interface LeaveRequestSectionProps {
 export default function LeaveRequestSection({ staffId }: LeaveRequestSectionProps) {
   const [showForm, setShowForm] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [dataUpdateCount, setDataUpdateCount] = useState(0)
+
+  // Listen to real-time leave request updates for this staff
+  useLeaveRequestUpdates(
+    (record) => {
+      if (record.staff_id === staffId) {
+        console.log('[LeaveRequestSection] Leave request updated:', record)
+        // Trigger a refresh after a short delay
+        setTimeout(() => {
+          setDataUpdateCount((prev) => prev + 1)
+          window.location.reload()
+        }, 500)
+      }
+    },
+    (record) => {
+      if (record.staff_id === staffId) {
+        console.log('[LeaveRequestSection] New leave request:', record)
+        // Trigger a refresh after a short delay
+        setTimeout(() => {
+          setDataUpdateCount((prev) => prev + 1)
+          window.location.reload()
+        }, 500)
+      }
+    }
+  )
 
   const handleFormSubmit = () => {
     setSubmitted(true)
@@ -28,6 +54,9 @@ export default function LeaveRequestSection({ staffId }: LeaveRequestSectionProp
           <Calendar size={20} />
           <h2>Leave Request</h2>
         </div>
+        {dataUpdateCount > 0 && (
+          <span className="text-xs text-green-600 font-medium">Auto-updated</span>
+        )}
       </div>
 
       {submitted ? (

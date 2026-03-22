@@ -14,6 +14,7 @@ interface CreateMeetingData {
 interface UpdateMeetingData {
   status?: string;
   attendees?: string[];
+  completed_at?: string;
 }
 
 interface StaffProfile {

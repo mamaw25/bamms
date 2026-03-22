@@ -1,7 +1,8 @@
 'use client';
 
-import { Download } from 'lucide-react';
-import { useState } from 'react';
+import { Download, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAttendanceUpdates } from '@/lib/realtime/hooks';
 
 interface AttendanceRecord {
   id: string;
@@ -19,6 +20,34 @@ interface AttendanceRecord {
 
 export default function ExportButton({ attendance }: { attendance: AttendanceRecord[] }) {
   const [isExporting, setIsExporting] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [hasUpdates, setHasUpdates] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+
+  // Listen to attendance changes
+  useAttendanceUpdates(
+    (record) => {
+      console.log('[ExportButton] Attendance updated:', record);
+      setHasUpdates(true);
+      setLastUpdated(new Date());
+    },
+    (record) => {
+      console.log('[ExportButton] New attendance record:', record);
+      setHasUpdates(true);
+      setLastUpdated(new Date());
+    }
+  );
+
+  // Auto-refresh the page when new data arrives
+  useEffect(() => {
+    if (hasUpdates && autoRefresh) {
+      const timer = setTimeout(() => {
+        console.log('[ExportButton] Auto-refreshing due to new attendance data');
+        window.location.reload();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasUpdates, autoRefresh]);
 
   const formatTime = (dateString: string | null) => {
     if (!dateString) return '--:--';
@@ -160,8 +189,14 @@ export default function ExportButton({ attendance }: { attendance: AttendanceRec
     }
   };
 
+  const getUpdateStatus = () => {
+    if (!hasUpdates) return null;
+    const timeSince = Math.floor((new Date().getTime() - lastUpdated.getTime()) / 1000);
+    return `Updated ${timeSince}s ago`;
+  };
+
   return (
-    <div>
+    <div className="flex items-center gap-2">
       <button 
         onClick={handleExportExcel}
         disabled={isExporting}
@@ -170,6 +205,13 @@ export default function ExportButton({ attendance }: { attendance: AttendanceRec
       >
         <Download size={16} /> {isExporting ? 'Exporting...' : 'Export Excel'}
       </button>
+      
+      {hasUpdates && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+          <RefreshCw size={14} className="text-blue-600 animate-spin" />
+          <span className="text-xs font-medium text-blue-600">{getUpdateStatus()}</span>
+        </div>
+      )}
     </div>
   );
 }
