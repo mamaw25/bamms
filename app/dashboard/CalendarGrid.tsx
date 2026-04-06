@@ -9,6 +9,7 @@ interface AttendanceRecord {
   status: 'present' | 'absent' | 'late';
   check_in: string;
   clock_out?: string;
+  work_from_home?: boolean;
 }
 
 interface LeaveRequest {
@@ -104,7 +105,7 @@ export default function CalendarGrid({
                   )}
                 </>
               ) : details && (
-                <div className={`w-1.5 h-1.5 rounded-full mt-1 ${details.status === 'present' ? 'bg-green-500' : 'bg-red-500'}`} />
+                <div className={`w-1.5 h-1.5 rounded-full mt-1 ${details.work_from_home ? 'bg-purple-500' : details.status === 'present' ? 'bg-green-500' : 'bg-red-500'}`} title={details.work_from_home ? 'Work From Home' : 'On-Site'} />
               )}
             </button>
           );

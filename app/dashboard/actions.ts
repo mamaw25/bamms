@@ -1,134 +1,174 @@
 'use server'
 
+import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-type KioskResponse = 
-  | { success: true; message: string; type: 'in' | 'out' }
-  | { success: false; error: string; message?: never; type?: never };
-
-// Help create admin client with service role key for kiosk operations
-async function createAdminClient() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error('Missing Supabase configuration for admin client');
-  }
-  const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  )
-}
-
-export async function handleKioskAction(idNumber: string): Promise<KioskResponse> {
+export async function clockIn(userId: string, firstName: string) {
   try {
-    if (!idNumber || idNumber.trim() === '') {
-      return { success: false, error: "Please enter a valid ID number" }
-    }
-
-    let supabase
-    try {
-      supabase = await createAdminClient()
-    } catch (error) {
-      console.error('Supabase client creation error:', error)
-      return { success: false, error: "Connection error. Please try again." }
-    }
-
+    const supabase = await createClient()
     const todayStr = new Date().toLocaleDateString('en-CA')
 
-    // 1. Find user profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, first_name')
-      .eq('unique_id_number', idNumber)
-      .single()
-
-    if (profileError || !profile) {
-      return { success: false, error: "Invalid ID Number" }
-    }
-
-    // 2. Look for an open session (NULL clock_out) for TODAY only
-    const { data: openRecord } = await supabase
+    // Check if already clocked in
+    const { data: existingRecord } = await supabase
       .from('attendance')
       .select('*')
-      .eq('profile_id', profile.id)
+      .eq('profile_id', userId)
       .eq('date', todayStr)
-      .is('clock_out', null)
       .maybeSingle()
 
-    if (openRecord) {
-      // Found a check-in for today -> Now Clock Out
-      return await clockOut(profile.id, profile.first_name, openRecord.id)
-    } else {
-      // No check-in for today found -> Now Clock In
-      return await clockIn(profile.id, profile.first_name)
+    if (existingRecord && !existingRecord.clock_out) {
+      return { success: false, error: 'Already clocked in' }
     }
-  } catch (error) {
-    console.error('Kiosk action error:', error)
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
-    if (errorMessage.includes('ENOTFOUND') || errorMessage.includes('fetch')) {
-      return { success: false, error: "Connection error. Please check your internet connection." }
-    }
-    return { success: false, error: errorMessage }
-  }
-}
 
-export async function clockIn(userId: string, firstName: string): Promise<KioskResponse> {
-  try {
-    const supabase = await createAdminClient()
-    const today = new Date().toLocaleDateString('en-CA')
-    
+    // Insert new clock-in record
     const { error } = await supabase
       .from('attendance')
       .insert({
         profile_id: userId,
-        date: today,
+        date: todayStr,
+        check_in: new Date().toISOString(),
+        clock_out: null,
         status: 'present',
-        check_in: new Date().toISOString()
+        work_from_home: false
       })
 
     if (error) {
-      console.error('[clockIn] Database error:', error)
-      if (error.code === '23505') {
-        return { success: false, error: `${firstName}, you have already completed your shift today.` }
-      }
-      return { success: false, error: `Database error during Clock In. [${error.code || 'unknown'}]` }
+      console.error('Clock in error:', error)
+      return { success: false, error: 'Failed to clock in' }
     }
-    
+
     revalidatePath('/dashboard')
-    revalidatePath('/kiosk')
-    return {
-      success: true,
-      message: `Welcome ${firstName}! Clocked In successfully.`,
-      type: 'in'
-    }
-  } catch (error) {
-    console.error('Clock in error:', error)
-    return { success: false, error: error instanceof Error ? error.message : "Failed to clock in" }
+    return { success: true, message: `Welcome, ${firstName}! You are clocked in.` }
+  } catch (err) {
+    console.error('Clock in exception:', err)
+    return { success: false, error: 'System error occurred' }
   }
 }
 
-export async function clockOut(userId: string, firstName: string, attendanceId: string): Promise<KioskResponse> {
+export async function clockOut(userId: string, firstName: string, recordId?: string) {
   try {
-    const supabase = await createAdminClient()
-    
+    const supabase = await createClient()
+    const todayStr = new Date().toLocaleDateString('en-CA')
+
+    let targetRecordId = recordId
+
+    // If no recordId provided, find the active record
+    if (!targetRecordId) {
+      const { data: activeRecord } = await supabase
+        .from('attendance')
+        .select('id')
+        .eq('profile_id', userId)
+        .eq('date', todayStr)
+        .is('clock_out', null)
+        .single()
+
+      if (!activeRecord) {
+        return { success: false, error: 'No active clock-in record found' }
+      }
+
+      targetRecordId = activeRecord.id
+    }
+
+    // Update the record with clock-out time
     const { error } = await supabase
       .from('attendance')
       .update({ clock_out: new Date().toISOString() })
-      .eq('id', attendanceId)
+      .eq('id', targetRecordId)
 
     if (error) {
-      console.error('[clockOut] Database error:', error)
-      return { success: false, error: "Database error during Clock Out." }
+      console.error('Clock out error:', error)
+      return { success: false, error: 'Failed to clock out' }
     }
-    
+
     revalidatePath('/dashboard')
-    revalidatePath('/kiosk')
-    return {
-      success: true,
-      message: `Goodbye ${firstName}! Clocked Out successfully.`,
-      type: 'out'
+    return { success: true, message: `Thank you, ${firstName}! You are clocked out.` }
+  } catch (err) {
+    console.error('Clock out exception:', err)
+    return { success: false, error: 'System error occurred' }
+  }
+}
+
+export async function workFromHomeCheckIn(userId: string, firstName: string) {
+  try {
+    const supabase = await createClient()
+    const todayStr = new Date().toLocaleDateString('en-CA')
+
+    // Check if already has a record today
+    const { data: existingRecord } = await supabase
+      .from('attendance')
+      .select('*')
+      .eq('profile_id', userId)
+      .eq('date', todayStr)
+      .maybeSingle()
+
+    if (existingRecord && !existingRecord.clock_out) {
+      return { success: false, error: 'Already checked in for today' }
     }
-  } catch (error) {
-    console.error('Clock out error:', error)
-    return { success: false, error: error instanceof Error ? error.message : "Failed to clock out" }
+
+    // Insert new WFH record
+    const { error } = await supabase
+      .from('attendance')
+      .insert({
+        profile_id: userId,
+        date: todayStr,
+        check_in: new Date().toISOString(),
+        clock_out: null,
+        status: 'present',
+        work_from_home: true
+      })
+
+    if (error) {
+      console.error('WFH check-in error:', error)
+      return { success: false, error: 'Failed to check in' }
+    }
+
+    revalidatePath('/dashboard')
+    return { success: true, message: `Welcome, ${firstName}! Work From Home started.` }
+  } catch (err) {
+    console.error('WFH check-in exception:', err)
+    return { success: false, error: 'System error occurred' }
+  }
+}
+
+export async function workFromHomeCheckOut(userId: string, firstName: string, recordId?: string) {
+  try {
+    const supabase = await createClient()
+    const todayStr = new Date().toLocaleDateString('en-CA')
+
+    let targetRecordId = recordId
+
+    // If no recordId provided, find the active record
+    if (!targetRecordId) {
+      const { data: activeRecord } = await supabase
+        .from('attendance')
+        .select('id')
+        .eq('profile_id', userId)
+        .eq('date', todayStr)
+        .is('clock_out', null)
+        .maybeSingle()
+
+      if (!activeRecord) {
+        return { success: false, error: 'No active WFH check-in found' }
+      }
+
+      targetRecordId = activeRecord.id
+    }
+
+    // Update the record with clock-out time
+    const { error } = await supabase
+      .from('attendance')
+      .update({ clock_out: new Date().toISOString() })
+      .eq('id', targetRecordId)
+
+    if (error) {
+      console.error('WFH check-out error:', error)
+      return { success: false, error: 'Failed to check out' }
+    }
+
+    revalidatePath('/dashboard')
+    return { success: true, message: `Thank you, ${firstName}! Work From Home ended.` }
+  } catch (err) {
+    console.error('WFH check-out exception:', err)
+    return { success: false, error: 'System error occurred' }
   }
 }

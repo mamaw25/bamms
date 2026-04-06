@@ -9,6 +9,7 @@ interface RawAttendance {
   date: string;
   check_in: string;
   clock_out: string | null;
+  work_from_home: boolean;
   profile_id: string;
   profiles: {
     first_name: string;
@@ -24,6 +25,7 @@ export interface AttendanceReport {
   date: string;
   check_in: string;
   clock_out: string | null;
+  work_from_home: boolean;
   duration: string;
   profiles: {
     first_name: string;
@@ -83,6 +85,7 @@ export async function getAttendanceReport(selectedDate?: string): Promise<Attend
       date: record.date,
       check_in: record.check_in,
       clock_out: record.clock_out,
+      work_from_home: record.work_from_home || false,
       duration,
       profiles: {
         first_name: record.profiles?.first_name || 'MISSING',

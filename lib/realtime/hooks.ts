@@ -20,11 +20,13 @@ export function useTableSubscription(
   options: RealtimeOptions = {}
 ) {
   const [isConnected, setIsConnected] = useState(false)
-  const supabase = createClient()
 
   useEffect(() => {
+    // Only run in browser
+    if (typeof window === 'undefined') return
     if (options.enabled === false) return
 
+    const supabase = createClient()
     let channel: RealtimeChannel | null = null
     let mounted = true
 

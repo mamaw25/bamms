@@ -73,7 +73,7 @@ export default function ExportButton({ data }: { data: AttendanceReport[] }) {
         const records = groupedByDate[dateStr];
         
         // Create header
-        const headers = ['Staff Member', 'ID Number', 'Role', 'Date', 'Clock In', 'Clock Out', 'Duration', 'Status'];
+        const headers = ['Staff Member', 'ID Number', 'Role', 'Date', 'Clock In', 'Clock Out', 'Duration', 'Location', 'Status'];
         
         // Create rows
         const rows = records.map(record => {
@@ -82,6 +82,7 @@ export default function ExportButton({ data }: { data: AttendanceReport[] }) {
           const clockOutTime = record.clock_out 
             ? new Date(record.clock_out).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
             : 'N/A';
+          const location = record.work_from_home ? 'Work From Home' : 'On-Site';
           
           return [
             `${record.profiles.first_name} ${record.profiles.last_name}`,
@@ -91,6 +92,7 @@ export default function ExportButton({ data }: { data: AttendanceReport[] }) {
             clockInTime,
             clockOutTime,
             record.duration,
+            location,
             record.clock_out ? 'Completed' : 'On Duty'
           ];
         });

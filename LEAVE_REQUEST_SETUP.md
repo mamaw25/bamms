@@ -1,6 +1,6 @@
 # Leave Request System Setup
 
-This document describes the database setup for the leave request feature (leave, absent, day-off).
+This document describes the database setup for the leave request feature (Sick Leave, Maternity Leave, Paternity Leave, Others).
 
 ## Database Migration
 
@@ -11,10 +11,10 @@ Run these SQL commands in your Supabase SQL Editor:
 CREATE TABLE leave_requests (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   staff_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  request_type TEXT NOT NULL CHECK (request_type IN ('leave', 'absent', 'day_off')),
+  request_type TEXT NOT NULL CHECK (request_type IN ('sick_leave', 'maternity_leave', 'paternity_leave', 'others')),
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
-  reason TEXT,
+  reason TEXT NOT NULL,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   admin_notes TEXT,
   created_at TIMESTAMP DEFAULT now(),
@@ -49,13 +49,30 @@ CREATE POLICY "Admins can update leave requests" ON leave_requests
   ));
 ```
 
+## Update Existing Table
+
+If you already have the leave_requests table with old values, run this migration:
+
+```sql
+-- Drop the old constraint
+ALTER TABLE leave_requests DROP CONSTRAINT leave_requests_request_type_check;
+
+-- Add the new constraint
+ALTER TABLE leave_requests
+ADD CONSTRAINT leave_requests_request_type_check 
+CHECK (request_type IN ('sick_leave', 'maternity_leave', 'paternity_leave', 'others'));
+
+-- Make reason NOT NULL for new records (optional: backfill existing NULLs first)
+-- ALTER TABLE leave_requests ALTER COLUMN reason SET NOT NULL;
+```
+
 ## Features Included
 
-- **Request Types:** Leave, Absent, Day Off
+- **Request Types:** Sick Leave, Maternity Leave, Paternity Leave, Others
 - **Status:** Pending, Approved, Rejected
 - **Admin Notes:** Admins can add notes when approving/rejecting
 - **Date Range:** Support for multi-day requests
-- **Reason:** Staff can provide reason for the request
+- **Reason:** Staff must provide reason for the request (required field)
 
 ## How to Use
 

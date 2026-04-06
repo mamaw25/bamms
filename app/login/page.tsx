@@ -39,7 +39,7 @@ function LoginForm() {
   return (
     /* Unified background to match the landing page */
     <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 font-sans">
-      <div className="bg-[#1e293b] p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700">
+      <div className="bg-[#1e293b] p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700 text-center transition-all">
         
         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg ${
           isAdmin ? 'bg-blue-600' : 'bg-emerald-600'

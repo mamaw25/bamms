@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Users, ClipboardList, LogOut, LayoutDashboard, Calendar } from 'lucide-react';
+import { Users, ClipboardList, LogOut, LayoutDashboard, Calendar, User } from 'lucide-react';
 import { signOut } from '@/app/register/action';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
@@ -62,6 +62,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <span className="text-sm font-medium">Barangay Meetings</span>
             </Link>
           </nav>
+
+          {/* Divider */}
+          <div className="mt-8 mb-8 h-px bg-white/10"></div>
+
+          {/* Admin Profile Section - Distinct */}
+          <div className="space-y-3">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 mb-3">Admin</p>
+            <Link 
+              href="/dashboard/admin/profile" 
+              className="flex items-center gap-3 p-4 bg-gradient-to-r from-indigo-600/20 to-blue-600/20 hover:from-indigo-600/30 hover:to-blue-600/30 rounded-xl transition-all group border border-indigo-500/30 hover:border-indigo-500/50"
+            >
+              <User size={18} className="text-indigo-400 group-hover:scale-110 transition-transform flex-shrink-0" />
+              <span className="text-sm font-semibold text-indigo-200">My Profile</span>
+            </Link>
+          </div>
         </div>
 
         {/* Bottom Sign Out Section */}

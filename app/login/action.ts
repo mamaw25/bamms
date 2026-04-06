@@ -69,12 +69,14 @@ export async function login(formData: FormData) {
       }
     }
 
-     // If database says 'admin' -> go to /dashboard/admin
-     // Otherwise -> go to /dashboard (staff dashboard)
+    // If database says 'admin' -> go to /dashboard/admin
+    // Otherwise -> go to /dashboard (staff dashboard)
     const redirectUrl = profile.role === 'admin' ? '/dashboard/admin' : '/dashboard'
     
     // Revalidate paths to ensure user data is fresh
     revalidatePath('/', 'layout')
+    revalidatePath('/dashboard', 'layout')
+    revalidatePath('/dashboard/admin', 'layout')
     
     return { success: true, redirectUrl }
   } catch (error) {

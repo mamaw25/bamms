@@ -9,7 +9,7 @@ export default function LeaveRequestForm({ staffId, onSuccess, onCancel }: { sta
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [formData, setFormData] = useState({
-    requestType: 'leave',
+    requestType: 'sick_leave',
     startDate: '',
     endDate: '',
     reason: ''
@@ -31,7 +31,7 @@ export default function LeaveRequestForm({ staffId, onSuccess, onCancel }: { sta
 
     if (result.success) {
       setSuccess(true)
-      setFormData({ requestType: 'leave', startDate: '', endDate: '', reason: '' })
+      setFormData({ requestType: 'sick_leave', startDate: '', endDate: '', reason: '' })
       setTimeout(() => {
         setSuccess(false)
         onSuccess?.()
@@ -72,9 +72,10 @@ export default function LeaveRequestForm({ staffId, onSuccess, onCancel }: { sta
             onChange={(e) => setFormData({ ...formData, requestType: e.target.value })}
             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900"
           >
-            <option value="leave">Leave</option>
-            <option value="absent">Absent</option>
-            <option value="day_off">Day Off</option>
+            <option value="sick_leave">Sick Leave</option>
+            <option value="maternity_leave">Maternity Leave</option>
+            <option value="paternity_leave">Paternity Leave</option>
+            <option value="others">Others</option>
           </select>
         </div>
 
@@ -107,9 +108,10 @@ export default function LeaveRequestForm({ staffId, onSuccess, onCancel }: { sta
 
         <div>
           <label className="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
-            Reason (Optional)
+            Reason <span className="text-red-600">*</span>
           </label>
           <textarea
+            required
             value={formData.reason}
             onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
             placeholder="Provide a reason for your request..."

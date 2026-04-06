@@ -4,15 +4,20 @@ import { Calendar, Users, Filter, X } from 'lucide-react';
 import Link from 'next/link';
 import ExportButton from './ExportButton';
 import { AdminReportRealtime } from './AdminReportRealtime';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
-// Helper function to format time consistently on server without locale conversion
+// Helper function to format time consistently using ISO string parsing
+// This prevents hydration mismatch by using UTC time
 function formatTimeForServer(dateString: string | null): string {
   if (!dateString) return '--:--:--';
-  const date = new Date(dateString);
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-  return `${hours}:${minutes}:${seconds}`;
+  // Parse the ISO string directly without creating Date object
+  // ISO format: "2024-01-01T14:30:45.123Z"
+  const match = dateString.match(/T(\d{2}):(\d{2}):(\d{2})/);
+  if (match) {
+    return `${match[1]}:${match[2]}:${match[3]}`;
+  }
+  return '--:--:--';
 }
 
 export const revalidate = 0;
@@ -22,13 +27,33 @@ export default async function AdminReportingPage({
 }: {
   searchParams: Promise<{ date?: string }>;
 }) {
+  // Verify admin access
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    redirect('/login');
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'admin') {
+    redirect('/dashboard');
+  }
+
   const params = await searchParams;
   const selectedDate = params.date;
   const reports: AttendanceReport[] = await getAttendanceReport(selectedDate);
 
   return (
     <AdminReportRealtime>
-      <div className="p-8 bg-gray-50 min-h-screen">
+      <div className="p-8 bg-gray-50 min-h-screen"
+        suppressHydrationWarning
+      >
         <div className="max-w-6xl mx-auto text-gray-900">
           
           <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
@@ -88,13 +113,14 @@ export default async function AdminReportingPage({
                     <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
                     <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">In/Out Times</th>
                     <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Duration</th>
+                    <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Location</th>
                     <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50" suppressHydrationWarning>
                   {reports.length > 0 ? (
                     reports.map((row) => (
-                      <tr key={row.id} className="hover:bg-blue-50/30 transition-colors group">
+                      <tr key={row.id} className="hover:bg-blue-50/30 transition-colors group" suppressHydrationWarning>
                         <td className="px-6 py-4">
                           <Link href={`/dashboard/admin/staff/${row.profiles.unique_id_number}`} className="block group-hover:text-blue-600 transition-colors">
                             <div className="font-bold">{row.profiles.first_name} {row.profiles.last_name}</div>
@@ -115,6 +141,13 @@ export default async function AdminReportingPage({
                           )}
                         </td>
                         <td className="px-6 py-4 font-mono font-bold text-gray-700">{row.duration}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                            row.work_from_home ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-orange-50 text-orange-600 border-orange-100'
+                          }`}>
+                            {row.work_from_home ? 'WFH' : 'On-Site'}
+                          </span>
+                        </td>
                         <td className="px-6 py-4">
                           <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                             row.clock_out ? 'bg-gray-100 text-gray-400 border-gray-200' : 'bg-green-50 text-green-600 border-green-100'

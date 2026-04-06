@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  // Create response first without setting cookies
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -21,16 +22,10 @@ export async function updateSession(request: NextRequest) {
             return request.cookies.getAll()
           },
           setAll(cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>) {
+            // Don't set cookies in middleware to avoid overwriting other tab's session
+            // Each tab should manage its own session via sessionStorage
             cookiesToSet.forEach(({ name, value }) => 
               request.cookies.set(name, value)
-            )
-            
-            supabaseResponse = NextResponse.next({
-              request,
-            })
-
-            cookiesToSet.forEach(({ name, value, options }) =>
-              supabaseResponse.cookies.set(name, value, options)
             )
           },
         },
@@ -43,15 +38,41 @@ export async function updateSession(request: NextRequest) {
         data: { user },
       } = await supabase.auth.getUser()
 
-      // If no user and trying to access dashboard, send to login
-      if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/login'
-        // Preserve the admin role indicator if accessing /dashboard/admin
-        if (request.nextUrl.pathname.startsWith('/dashboard/admin')) {
-          url.searchParams.set('role', 'admin')
+      if (!user) {
+        // No user - check if accessing protected routes
+        if (request.nextUrl.pathname.startsWith('/dashboard')) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/login'
+          if (request.nextUrl.pathname.startsWith('/dashboard/admin')) {
+            url.searchParams.set('role', 'admin')
+          }
+          return NextResponse.redirect(url)
         }
-        return NextResponse.redirect(url)
+      } else {
+        // User exists - validate role matches route
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+
+        // Check if accessing admin route without admin role
+        if (request.nextUrl.pathname.startsWith('/dashboard/admin')) {
+          if (profile?.role !== 'admin') {
+            // Not admin - redirect to staff dashboard
+            const url = request.nextUrl.clone()
+            url.pathname = '/dashboard'
+            return NextResponse.redirect(url)
+          }
+        }
+        
+        // Check if accessing staff dashboard with admin role
+        if (request.nextUrl.pathname === '/dashboard' && profile?.role === 'admin') {
+          // Admin accessing staff dashboard - redirect to admin dashboard
+          const url = request.nextUrl.clone()
+          url.pathname = '/dashboard/admin'
+          return NextResponse.redirect(url)
+        }
       }
     } catch (authError) {
       console.error('Middleware auth check failed:', authError);

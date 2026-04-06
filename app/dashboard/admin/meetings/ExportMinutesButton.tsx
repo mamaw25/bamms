@@ -2,6 +2,7 @@
 
 import { Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType, TextRun, PageBreak, AlignmentType } from 'docx';
 import { getMeetingMinutes, getMeetingAttendees } from './action';
 
 interface Meeting {
@@ -66,9 +67,23 @@ export default function ExportMinutesButton({
     fetchData();
   }, [meeting.id]);
 
-  const handleExportPDF = () => {
-    const doc = generatePDFContent(meeting, minutes);
-    downloadPDF(doc, `meeting-minutes-${meeting.id}.txt`);
+  const handleExportPDF = async () => {
+    try {
+      const doc = generateDocxContent(meeting, minutes);
+      await Packer.toBlob(doc).then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `meeting-minutes-${meeting.id}.docx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+    } catch (error) {
+      console.error('Error exporting document:', error);
+      alert('Failed to export meeting minutes');
+    }
   };
 
   return (
@@ -82,7 +97,7 @@ export default function ExportMinutesButton({
   );
 }
 
-function generatePDFContent(meeting: Meeting, minutes: MeetingMinutes | null): string {
+function generateDocxContent(meeting: Meeting, minutes: MeetingMinutes | null): Document {
   const date = new Date(meeting.date);
   const formattedDate = date.toLocaleDateString('en-US', {
     weekday: 'long',
@@ -92,7 +107,6 @@ function generatePDFContent(meeting: Meeting, minutes: MeetingMinutes | null): s
   });
 
   // Format meeting start time with AM/PM
-  const [hours, minutes_str] = meeting.time.split(':');
   const startDate = new Date(`2000-01-01T${meeting.time}`);
   const formattedStartTime = startDate.toLocaleTimeString('en-PH', {
     hour: '2-digit',
@@ -111,44 +125,119 @@ function generatePDFContent(meeting: Meeting, minutes: MeetingMinutes | null): s
       })
     : 'Not ended yet';
 
-  return `
-═══════════════════════════════════════════════════════════════════════════════
-                        BARANGAY MEETING MINUTES
-═══════════════════════════════════════════════════════════════════════════════
+  const doc = new Document({
+    sections: [{
+      children: [
+        // Title
+        new Paragraph({
+          children: [new TextRun({
+            text: 'BARANGAY MEETING MINUTES',
+            bold: true,
+            size: 56
+          })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 400 }
+        }),
 
-MEETING DETAILS
-───────────────────────────────────────────────────────────────────────────────
-Meeting Title:    ${meeting.title}
-Date:             ${formattedDate}
-Started at:       ${formattedStartTime}
-Ended at:         ${formattedEndTime}
-Venue:            ${meeting.venue}
-Status:           ${meeting.status}
+        // Meeting Details Section
+        new Paragraph({
+          children: [new TextRun({
+            text: 'MEETING DETAILS',
+            bold: true,
+            size: 48
+          })],
+          spacing: { before: 200, after: 200 }
+        }),
 
-AGENDA
-───────────────────────────────────────────────────────────────────────────────
-${meeting.agenda}
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Meeting Title:', bold: true })] })] }),
+                new TableCell({ children: [new Paragraph({ text: meeting.title })] })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Date:', bold: true })] })] }),
+                new TableCell({ children: [new Paragraph({ text: formattedDate })] })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Started at:', bold: true })] })] }),
+                new TableCell({ children: [new Paragraph({ text: formattedStartTime })] })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Ended at:', bold: true })] })] }),
+                new TableCell({ children: [new Paragraph({ text: formattedEndTime })] })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Venue:', bold: true })] })] }),
+                new TableCell({ children: [new Paragraph({ text: meeting.venue })] })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Status:', bold: true })] })] }),
+                new TableCell({ children: [new Paragraph({ text: meeting.status })] })
+              ]
+            })
+          ]
+        }),
 
-MEETING NOTES
-───────────────────────────────────────────────────────────────────────────────
-${minutes?.notes || '(Space for meeting notes and discussions)'}
+        new Paragraph({ text: '', spacing: { after: 400 } }),
 
-═══════════════════════════════════════════════════════════════════════════════
-Generated: ${new Date().toLocaleString()}
-═══════════════════════════════════════════════════════════════════════════════
-  `;
-}
+        // Agenda Section
+        new Paragraph({
+          children: [new TextRun({
+            text: 'AGENDA',
+            bold: true,
+            size: 48
+          })],
+          spacing: { before: 200, after: 200 }
+        }),
 
-function downloadPDF(content: string, filename: string) {
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
+        new Paragraph({
+          text: meeting.agenda || '(No agenda provided)',
+          spacing: { after: 400 }
+        }),
 
-  link.setAttribute('href', url);
-  link.setAttribute('download', filename);
-  link.style.visibility = 'hidden';
+        // Meeting Notes Section
+        new Paragraph({
+          children: [new TextRun({
+            text: 'MEETING NOTES',
+            bold: true,
+            size: 48
+          })],
+          spacing: { before: 200, after: 200 }
+        }),
 
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+        new Paragraph({
+          text: minutes?.notes || '(Space for meeting notes and discussions)',
+          spacing: { after: 400 }
+        }),
+
+        new Paragraph({ text: '', spacing: { after: 200 } }),
+
+        // Footer
+        new Paragraph({
+          children: [new TextRun({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            italics: true,
+            size: 36
+          })],
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 400 }
+        })
+      ]
+    }]
+  });
+
+  return doc;
 }

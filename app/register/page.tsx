@@ -33,8 +33,8 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4">
-        <div className="bg-[#1e293b] p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700">
+      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 font-sans">
+        <div className="bg-[#1e293b] p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700 text-center transition-all">
           <div className="text-center">
             <div className="mb-4">
               <svg
@@ -55,7 +55,7 @@ export default function RegisterPage() {
               Account Created!
             </h2>
             <p className="text-slate-300 mb-4">
-              We've sent a verification email to:
+              We&apos;ve sent a verification email to:
             </p>
             <p className="text-blue-400 font-bold mb-6 break-all">{registeredEmail}</p>
             <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-lg mb-6">
@@ -67,7 +67,7 @@ export default function RegisterPage() {
             {verificationToken && (
               <details className="mb-6 p-3 bg-slate-800/50 border border-slate-600 rounded-lg">
                 <summary className="text-slate-300 text-xs cursor-pointer font-semibold hover:text-slate-200">
-                  ⚠️ Didn't receive email? Click here for manual verification
+                  ⚠️ Didn&apos;t receive email? Click here for manual verification
                 </summary>
                 <div className="mt-3 pt-3 border-t border-slate-600">
                   <p className="text-slate-400 text-xs mb-2">
@@ -92,7 +92,7 @@ export default function RegisterPage() {
             )}
             
             <p className="text-slate-400 text-xs mb-6">
-              Once verified, you'll be able to log in to the system.
+              Once verified, you&apos;ll be able to log in to the system.
             </p>
             <button
               onClick={() => router.push('/login')}
@@ -116,8 +116,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4">
-      <div className="bg-[#1e293b] p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700">
+    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 font-sans">
+      <div className="bg-[#1e293b] p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700 text-center transition-all">
         <h2 className="text-2xl font-black text-white text-center uppercase mb-6">Create Account</h2>
         
         {error && (
@@ -143,6 +143,15 @@ export default function RegisterPage() {
             {loading ? 'Processing...' : 'Register'}
           </button>
         </form>
+
+        <div className="mt-8 pt-6 border-t border-slate-700/50 text-center">
+          <button
+            onClick={() => router.push('/')}
+            className="text-[10px] font-bold text-slate-500 hover:text-slate-300 uppercase tracking-[0.2em] transition-colors"
+          >
+            ← Return to Kiosk
+          </button>
+        </div>
       </div>
     </div>
   )

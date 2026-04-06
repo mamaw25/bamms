@@ -39,8 +39,11 @@ export async function signUp(formData: FormData) {
       }
     }
 
-    const SECRET_ADMIN_PASS = "ADMIN123"; 
-    const userRole = adminCode === SECRET_ADMIN_PASS ? 'admin' : 'staff';
+    const SECRET_ADMIN_PASS = process.env.ADMIN_VERIFICATION_CODE || '';
+    if (!SECRET_ADMIN_PASS) {
+      console.warn('ADMIN_VERIFICATION_CODE not configured. Admin registration will be disabled.');
+    }
+    const userRole = adminCode && adminCode === SECRET_ADMIN_PASS ? 'admin' : 'staff';
 
     // Generate verification token
     const verificationToken = generateVerificationToken();

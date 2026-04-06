@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation';
 import { User, Calendar as CalendarIcon, LogOut, CheckCircle } from 'lucide-react';
 import { signOut } from '@/app/login/action';
 import CalendarGrid from './CalendarGrid'; 
-import { clockIn, clockOut } from './actions'; 
 import ActionButton from './ActionButton';
+import WFHButton from './WFHButton';
 import LeaveRequestSection from './components/LeaveRequestSection';
 import { DashboardRealtime } from './DashboardRealtime'; 
 
@@ -22,6 +22,11 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .single();
 
+  // Verify user is not admin (admins should use /dashboard/admin)
+  if (profile?.role === 'admin') {
+    redirect('/dashboard/admin');
+  }
+
   const { data: attendance } = await supabase
     .from('attendance')
     .select('*')
@@ -36,9 +41,11 @@ export default async function DashboardPage() {
     .in('status', ['approved', 'rejected']);
 
   // Logic to determine attendance state
+  const todayStr = new Date().toLocaleDateString('en-CA');
+  const todayRecord = attendance?.find(record => record.date === todayStr);
+  const isWorkFromHomeToday = todayRecord?.work_from_home === true;
   const activeRecord = attendance?.find(record => record.clock_out === null);
   const isClockedIn = !!activeRecord;
-  const todayStr = new Date().toLocaleDateString('en-CA');
   
   const finishedRecordToday = attendance?.find(
     record => record.date === todayStr && record.clock_out !== null
@@ -99,27 +106,41 @@ export default async function DashboardPage() {
             </div>
 
             <div className="mb-6">
-              {!isClockedIn && !finishedToday ? (
-                /* Pass the server action to the onConfirm prop */
-                <ActionButton 
-                  type="in" 
-                  firstName={profile?.first_name || 'User'} 
-                  onConfirm={async () => {
-                    'use server';
-                    await clockIn(user.id, profile?.first_name || 'User');
-                  }}
+              {!todayRecord && (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center gap-1 w-full bg-gray-50 text-gray-700 border border-gray-200 py-6 rounded-xl text-center">
+                    <p className="text-sm font-semibold uppercase tracking-widest">No Schedule for Today</p>
+                    <p className="text-xs font-medium opacity-80 mt-1">You can check in for Work From Home</p>
+                  </div>
+                  <WFHButton 
+                    type="in"
+                    userId={user.id}
+                    firstName={profile?.first_name || 'User'}
+                  />
+                </div>
+              )}
+              {todayRecord && !isWorkFromHomeToday && (
+                <div className="flex flex-col items-center gap-1 w-full bg-blue-50 text-blue-700 border border-blue-200 py-6 rounded-xl text-center">
+                  <p className="text-sm font-semibold uppercase tracking-widest">On-Site Work</p>
+                  <p className="text-xs font-medium opacity-80 mt-1">Please use the kiosk to check in</p>
+                </div>
+              )}
+              {todayRecord && isWorkFromHomeToday && !isClockedIn && !finishedToday && (
+                <WFHButton 
+                  type="in"
+                  userId={user.id}
+                  firstName={profile?.first_name || 'User'}
                 />
-              ) : isClockedIn ? (
-                <ActionButton 
-                  type="out" 
-                  firstName={profile?.first_name || 'User'} 
-                  onConfirm={async () => {
-                    'use server';
-                    await clockOut(user.id, profile?.first_name || 'User', activeRecord?.id);
-                  }}
+              )}
+              {todayRecord && isWorkFromHomeToday && isClockedIn && (
+                <WFHButton 
+                  type="out"
+                  userId={user.id}
+                  firstName={profile?.first_name || 'User'}
+                  recordId={activeRecord?.id}
                 />
-              ) : (
-                /* Shift Completed State */
+              )}
+              {finishedToday && (
                 <div className="flex flex-col items-center gap-1 w-full bg-green-50 text-green-700 border border-green-200 py-6 rounded-xl text-center">
                   <div className="flex items-center gap-2 font-bold uppercase tracking-widest text-sm">
                     <CheckCircle size={20} className="text-green-600" /> Shift Completed
