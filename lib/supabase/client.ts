@@ -17,26 +17,28 @@ export function createClient() {
           autoRefreshToken: true,
           detectSessionInUrl: true,
           storage: {
-            // Use sessionStorage instead of localStorage for tab-specific sessions
+            // Use localStorage for persistent session storage across browser restarts
+            // This ensures refresh tokens are available for automatic token refresh
             getItem: (key: string) => {
               try {
-                return sessionStorage.getItem(key)
+                return localStorage.getItem(key)
               } catch (e) {
+                console.warn('Failed to get item from localStorage:', key, e)
                 return null
               }
             },
             setItem: (key: string, value: string) => {
               try {
-                sessionStorage.setItem(key, value)
+                localStorage.setItem(key, value)
               } catch (e) {
-                // Ignore quota exceeded errors
+                console.warn('Failed to set item in localStorage:', key, e)
               }
             },
             removeItem: (key: string) => {
               try {
-                sessionStorage.removeItem(key)
+                localStorage.removeItem(key)
               } catch (e) {
-                // Ignore errors
+                console.warn('Failed to remove item from localStorage:', key, e)
               }
             },
           }
