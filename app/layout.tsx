@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import OfflineInitializer from "./components/OfflineInitializer";
-import { OfflineNotification } from "./components/OfflineUI";
 import TabSessionManager from "./components/TabSessionManager";
-import { GlobalErrorHandler } from "./components/ErrorBoundary";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,10 +36,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <GlobalErrorHandler />
         <TabSessionManager />
         <OfflineInitializer />
-        <OfflineNotification />
         {children}
       </body>
     </html>

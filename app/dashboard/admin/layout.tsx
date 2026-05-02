@@ -36,7 +36,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <div className="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-transform">
               <LayoutDashboard size={20} />
             </div>
-            <span className="font-bold tracking-tight text-xl uppercase">Admin Panel</span>
+            <span className="font-bold tracking-tight text-xl uppercase">B A M M S</span>
           </Link>
 
           <nav className="space-y-2">

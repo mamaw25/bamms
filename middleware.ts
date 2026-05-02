@@ -2,6 +2,17 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  // Public routes that don't need authentication
+  const publicRoutes = ['/', '/login', '/register', '/verify-email', '/about']
+  const pathname = request.nextUrl.pathname
+
+  // Skip auth check for public routes
+  if (publicRoutes.includes(pathname) || pathname.startsWith('/verify-email')) {
+    return NextResponse.next({
+      request,
+    })
+  }
+
   // Create response first without setting cookies
   let supabaseResponse = NextResponse.next({
     request,
@@ -36,59 +47,71 @@ export async function updateSession(request: NextRequest) {
       }
     )
 
-    // Refreshes the session if it's expired
+    // Only check authentication for protected routes
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser()
 
       if (!user) {
-        // No user - check if accessing protected routes
-        if (request.nextUrl.pathname.startsWith('/dashboard')) {
+        // No user - redirect to login for protected routes
+        if (pathname.startsWith('/dashboard') || pathname.startsWith('/kiosk')) {
           const url = request.nextUrl.clone()
           url.pathname = '/login'
-          if (request.nextUrl.pathname.startsWith('/dashboard/admin')) {
+          if (pathname.startsWith('/dashboard/admin')) {
             url.searchParams.set('role', 'admin')
           }
           return NextResponse.redirect(url)
         }
       } else {
-        // User exists - validate role matches route
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
+        // User exists - validate role matches route if on dashboard
+        if (pathname.startsWith('/dashboard')) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
 
-        // Check if accessing admin route without admin role
-        if (request.nextUrl.pathname.startsWith('/dashboard/admin')) {
-          if (profile?.role !== 'admin') {
-            // Not admin - redirect to staff dashboard
+          // Check if accessing admin route without admin role
+          if (pathname.startsWith('/dashboard/admin')) {
+            if (profile?.role !== 'admin') {
+              // Not admin - redirect to staff dashboard
+              const url = request.nextUrl.clone()
+              url.pathname = '/dashboard'
+              return NextResponse.redirect(url)
+            }
+          }
+          
+          // Check if accessing staff dashboard with admin role
+          if (pathname === '/dashboard' && profile?.role === 'admin') {
+            // Admin accessing staff dashboard - redirect to admin dashboard
             const url = request.nextUrl.clone()
-            url.pathname = '/dashboard'
+            url.pathname = '/dashboard/admin'
             return NextResponse.redirect(url)
           }
         }
-        
-        // Check if accessing staff dashboard with admin role
-        if (request.nextUrl.pathname === '/dashboard' && profile?.role === 'admin') {
-          // Admin accessing staff dashboard - redirect to admin dashboard
-          const url = request.nextUrl.clone()
-          url.pathname = '/dashboard/admin'
-          return NextResponse.redirect(url)
-        }
       }
     } catch (authError: unknown) {
-      // Suppress "refresh_token_not_found" errors on first load - this is expected when no session exists
-      // This is not an actual error condition, just the auth system checking for a session
+      // Silently fail for auth errors on protected routes that should redirect to login anyway
       const error = authError as { code?: string; status?: number; message?: string } | null
-      const isRefreshTokenError = error?.code === 'refresh_token_not_found' || error?.status === 400
-      const isExpectedError = isRefreshTokenError || error?.message?.includes('refresh')
+      
+      // Only log unexpected errors (not refresh token or standard auth errors)
+      const isExpectedError = 
+        error?.code === 'refresh_token_not_found' || 
+        error?.status === 400 ||
+        error?.message?.includes('refresh') ||
+        error?.message?.includes('Refresh')
       
       if (!isExpectedError) {
         console.error('Middleware auth check failed:', authError);
       }
-      // Continue with the response even if auth check fails - refresh token absence is not fatal
+      
+      // Redirect to login if auth check fails on protected routes
+      if (pathname.startsWith('/dashboard') || pathname.startsWith('/kiosk')) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        return NextResponse.redirect(url)
+      }
     }
 
     return supabaseResponse
@@ -114,3 +137,4 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
+
