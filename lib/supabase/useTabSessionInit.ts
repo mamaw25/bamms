@@ -15,13 +15,20 @@ export function useTabSessionInit() {
       sessionStorage.setItem('tab-session-id', tabId)
     }
 
-    // Listen for storage events to detect logout in other tabs
+    // Listen for logout in other tabs - only reload if auth is completely cleared
+    let reloadScheduled = false
+
     const handleStorageChange = (e: StorageEvent) => {
-      // If auth is cleared in localStorage but session exists in sessionStorage
-      // This tab should refresh to get correct state
-      if (e.key?.includes('sb-') && !e.newValue) {
-        // Auth was cleared, refresh this page to validate current session
-        window.location.reload()
+      // Only reload if the refresh token was explicitly cleared in another tab
+      // (indicating a logout operation)
+      if (e.key === 'sb-refresh-token' && e.newValue === null && e.oldValue !== null) {
+        if (!reloadScheduled) {
+          reloadScheduled = true
+          // Small delay to ensure storage event propagates
+          setTimeout(() => {
+            window.location.reload()
+          }, 100)
+        }
       }
     }
 

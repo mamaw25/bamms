@@ -41,10 +41,25 @@ export function createClient() {
                 console.warn('Failed to remove item from localStorage:', key, e)
               }
             },
-          }
+          },
+          // Suppress automatic error logging for refresh token issues on page load
+          throwOnError: false,
         }
       }
     )
+
+    // Add an auth state change listener to handle refresh token errors gracefully
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      // Log session events but don't throw errors for refresh failures
+      if (event === 'SIGNED_OUT') {
+        // Clear any stale refresh tokens
+        try {
+          localStorage.removeItem('sb-refresh-token')
+        } catch (e) {
+          // Silently fail
+        }
+      }
+    })
   }
 
   return supabaseClient

@@ -29,6 +29,10 @@ export async function updateSession(request: NextRequest) {
             )
           },
         },
+        auth: {
+          // Suppress automatic error logging from getUser() when no session exists
+          throwOnError: false,
+        }
       }
     )
 
@@ -74,9 +78,17 @@ export async function updateSession(request: NextRequest) {
           return NextResponse.redirect(url)
         }
       }
-    } catch (authError) {
-      console.error('Middleware auth check failed:', authError);
-      // Continue with the response even if auth check fails
+    } catch (authError: unknown) {
+      // Suppress "refresh_token_not_found" errors on first load - this is expected when no session exists
+      // This is not an actual error condition, just the auth system checking for a session
+      const error = authError as { code?: string; status?: number; message?: string } | null
+      const isRefreshTokenError = error?.code === 'refresh_token_not_found' || error?.status === 400
+      const isExpectedError = isRefreshTokenError || error?.message?.includes('refresh')
+      
+      if (!isExpectedError) {
+        console.error('Middleware auth check failed:', authError);
+      }
+      // Continue with the response even if auth check fails - refresh token absence is not fatal
     }
 
     return supabaseResponse
