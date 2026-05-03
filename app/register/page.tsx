@@ -149,7 +149,7 @@ export default function RegisterPage() {
             onClick={() => router.push('/')}
             className="text-[10px] font-bold text-slate-500 hover:text-slate-300 uppercase tracking-[0.2em] transition-colors"
           >
-            ← Return to Kiosk
+            ← Return to Landing Page
           </button>
         </div>
       </div>

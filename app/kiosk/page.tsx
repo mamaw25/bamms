@@ -43,7 +43,7 @@ export default function KioskPage() {
     <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center p-4 text-white font-sans">
       
       {/* Main Kiosk Box */}
-      <div className="bg-[#1e293b] p-8 rounded-3xl shadow-2xl border border-slate-700 w-full max-w-md text-center transition-all">
+      <div className="bg-[#1e293b] pt-10 px-8 pb-8 rounded-3xl shadow-2xl border border-slate-700 w-full max-w-md text-center transition-all">
         
         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transition-all duration-300 ${
           status.type === 'success' ? 'bg-green-600' : 
@@ -55,10 +55,10 @@ export default function KioskPage() {
            <Fingerprint size={32} />}
         </div>
 
-        <h1 className="text-4xl font-black uppercase tracking-tight mb-">
+        <h1 className="text-4xl font-black uppercase tracking-tight mb-2">
           {status.type === 'success' ? '✓ Success' : 
            status.type === 'error' ? '✗ Error' : 
-           'Attendance Kiosk'}
+           'ATTENDANCE KIOSK'}
         </h1>
         <p className="text-slate-400 text-sm mb-8 font-medium">
           {status.type === 'success' ? status.msg : 
@@ -67,7 +67,7 @@ export default function KioskPage() {
         </p>
 
         {!status.type && (
-          <div className="space-y-4">
+          <div className="flex flex-col items-center justify-center min-h-[140px] space-y-4">
             <input
               ref={inputRef}
               type="text"
@@ -76,12 +76,12 @@ export default function KioskPage() {
               onChange={(e) => setIdNumber(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && processAction()}
               disabled={isLoading}
-              className="w-full px-4 py-3 bg-[#0f172a] border-2 border-slate-700 rounded-xl text-white font-bold text-lg focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-700"
+              className="w-full px-6 py-5 bg-[#0f172a] border-2 border-slate-700 rounded-xl text-white font-bold text-2xl focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-700 placeholder:text-center text-center"
             />
             <button
               onClick={processAction}
               disabled={isLoading || !idNumber}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
+              className="max-w-xs mx-auto bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white py-2 px-8 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -97,8 +97,8 @@ export default function KioskPage() {
       </div>
 
       {/* Footer */}
-      <div className="mt-12 text-center text-slate-500 text-xs">
-        <p>Kiosk System v1.0</p>
+      <div className="mt-8 text-slate-600 text-[11px] font-mono uppercase tracking-[0.3em]">
+        <p>Kiosk System v2.0</p>
       </div>
     </div>
   );

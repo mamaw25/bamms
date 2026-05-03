@@ -67,7 +67,7 @@ export default function KioskPage() {
         </p>
 
         {!status.type && (
-          <div className="space-y-4">
+          <div className="flex flex-col items-center justify-center min-h-[200px] space-y-4">
             <input
               ref={inputRef}
               type="text"
@@ -76,7 +76,7 @@ export default function KioskPage() {
               onChange={(e) => setIdNumber(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && processAction()}
               disabled={isLoading}
-              className="w-full px-4 py-3 bg-[#0f172a] border-2 border-slate-700 rounded-xl text-white font-bold text-lg focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-700"
+              className="w-full px-4 py-3 bg-[#0f172a] border-2 border-slate-700 rounded-xl text-white font-bold text-lg focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-700 placeholder:text-center text-center"
             />
             <button
               onClick={processAction}
