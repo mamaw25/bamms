@@ -121,20 +121,20 @@ export default function LeaveRequestFormTemplate() {
           children: [
             // Header
             new Paragraph({
-              runs: [new TextRun({ text: 'LEAVE REQUEST FORM', size: 48, bold: true })],
+              children: [new TextRun({ text: 'LEAVE REQUEST FORM', size: 48, bold: true })],
               alignment: AlignmentType.CENTER,
               spacing: { after: 100 },
               thematicBreak: true
             }),
             new Paragraph({
-              runs: [new TextRun({ text: 'Please fill out all required fields and submit to your supervisor', size: 40 })],
+              children: [new TextRun({ text: 'Please fill out all required fields and submit to your supervisor', size: 40 })],
               alignment: AlignmentType.CENTER,
               spacing: { after: 200 }
             }),
 
             // Employee Information Section
             new Paragraph({
-              runs: [new TextRun({ text: 'EMPLOYEE INFORMATION', size: 44, bold: true })],
+              children: [new TextRun({ text: 'EMPLOYEE INFORMATION', size: 44, bold: true })],
               spacing: { before: 100, after: 100 },
               border: {
                 bottom: { color: '000000', space: 1, style: BorderStyle.SINGLE, size: 6 }
@@ -212,7 +212,7 @@ export default function LeaveRequestFormTemplate() {
 
             // Leave Details Section
             new Paragraph({
-              runs: [new TextRun({ text: 'LEAVE DETAILS', size: 44, bold: true })],
+              children: [new TextRun({ text: 'LEAVE DETAILS', size: 44, bold: true })],
               spacing: { before: 200, after: 100 },
               border: {
                 bottom: { color: '000000', space: 1, style: BorderStyle.SINGLE, size: 6 }
@@ -319,7 +319,7 @@ export default function LeaveRequestFormTemplate() {
 
             // Signatures Section
             new Paragraph({
-              runs: [new TextRun({ text: 'APPROVALS', size: 44, bold: true })],
+              children: [new TextRun({ text: 'APPROVALS', size: 44, bold: true })],
               spacing: { before: 200, after: 100 },
               border: {
                 bottom: { color: '000000', space: 1, style: BorderStyle.SINGLE, size: 6 }
