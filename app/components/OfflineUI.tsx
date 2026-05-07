@@ -10,4 +10,4 @@ export {
   SyncProgressPanel,
   OfflineNotification,
   OfflineSkeleton,
-} from './OfflineUI';
+} from './OfflineUI/index';
