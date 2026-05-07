@@ -85,8 +85,8 @@ function LoginForm() {
           <button 
             type="submit" 
             disabled={isLoading}
-            className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm transition-all shadow-lg flex items-center justify-center gap-2 ${
-              isAdmin ? 'bg-blue-600 hover:bg-blue-500' : 'bg-emerald-600 hover:bg-emerald-500'
+            className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm transition-all shadow-lg flex items-center justify-center gap-2 hover:scale-105 ${
+              isAdmin ? 'bg-blue-600 hover:bg-blue-500 hover:shadow-blue-500/50' : 'bg-emerald-600 hover:bg-emerald-500 hover:shadow-emerald-500/50'
             } disabled:opacity-50`}
           >
             {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Sign In'}

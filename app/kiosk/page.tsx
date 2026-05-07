@@ -81,7 +81,7 @@ export default function KioskPage() {
             <button
               onClick={processAction}
               disabled={isLoading || !idNumber}
-              className="max-w-xs mx-auto bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white py-2 px-8 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2"
+              className="max-w-xs mx-auto bg-blue-600 hover:bg-blue-500 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 disabled:bg-slate-600 text-white py-2 px-8 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>

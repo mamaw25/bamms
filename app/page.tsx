@@ -52,7 +52,7 @@ export default function LandingPage() {
       </div>
       
       <p className="mt-8 text-blue-300 text-[11px] font-mono uppercase tracking-[0.3em]">
-        Attendance Management System v2.0
+        Barangay Management System v2.0
       </p>
     </div>
   );

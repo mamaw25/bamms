@@ -28,7 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0f172a] text-white flex flex-col p-6 shadow-xl sticky top-0 h-screen">
+      <aside className="w-64 bg-gradient-to-br from-[#1A4480] via-[#1a3a60] to-[#0f2344] text-white flex flex-col p-6 shadow-xl sticky top-0 h-screen">
         
         {/* Navigation Section */}
         <div className="flex-1">
@@ -92,7 +92,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </button>
           </form>
           <div className="mt-4 px-3 opacity-30">
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">SYSTEM V1.0</p>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">SYSTEM V2.0</p>
           </div>
         </div>
       </aside>

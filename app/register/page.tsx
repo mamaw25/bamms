@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import { signUp } from './action'
 import { useRouter } from 'next/navigation'
 
@@ -10,6 +11,7 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false)
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null)
   const [verificationToken, setVerificationToken] = useState<string | null>(null)
+  const [showAdminCode, setShowAdminCode] = useState(false)
   const router = useRouter()
 
   // This fixes the TypeScript "action" error
@@ -133,12 +135,21 @@ export default function RegisterPage() {
           </div>
           <input name="email" type="email" placeholder="Email" required className="w-full bg-[#1A4480] border border-blue-400/30 p-3 rounded-xl text-white outline-none focus:border-blue-300" />
           <input name="password" type="password" placeholder="Password" required className="w-full bg-[#1A4480] border border-blue-400/30 p-3 rounded-xl text-white outline-none focus:border-blue-300" />
-          <input name="adminCode" placeholder="Admin Code (Optional)" className="w-full bg-[#1A4480] border border-blue-400/30 p-3 rounded-xl text-white outline-none focus:border-blue-300" />
+          <div className="relative">
+            <input name="adminCode" type={showAdminCode ? "text" : "password"} placeholder="Admin Code (Optional)" className="w-full bg-[#1A4480] border border-blue-400/30 p-3 pr-10 rounded-xl text-white outline-none focus:border-blue-300" />
+            <button
+              type="button"
+              onClick={() => setShowAdminCode(!showAdminCode)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-300 hover:text-blue-100 transition-colors"
+            >
+              {showAdminCode ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
           
           <button 
             disabled={loading}
             type="submit" 
-            className="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-500 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 py-4 rounded-xl font-bold uppercase tracking-widest transition-all disabled:opacity-50"
           >
             {loading ? 'Processing...' : 'Register'}
           </button>
