@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
   // Public routes that don't need authentication
-  const publicRoutes = ['/', '/login', '/register', '/verify-email', '/about']
+  const publicRoutes = ['/', '/login', '/register', '/verify-email', '/about', '/kiosk']
   const pathname = request.nextUrl.pathname
 
   // Skip auth check for public routes
@@ -55,7 +55,7 @@ export async function updateSession(request: NextRequest) {
 
       if (!user) {
         // No user - redirect to login for protected routes
-        if (pathname.startsWith('/dashboard') || pathname.startsWith('/kiosk')) {
+        if (pathname.startsWith('/dashboard')) {
           const url = request.nextUrl.clone()
           url.pathname = '/login'
           if (pathname.startsWith('/dashboard/admin')) {
