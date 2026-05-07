@@ -82,12 +82,21 @@ export async function getMeetingAttendees(meetingId: string) {
 
     // Combine and deduplicate: manual attendees + checked-in staff
     const staffIds = new Set<string>();
-    const allAttendees: Array<{
+    interface StaffMember {
+      id: string;
+      first_name: string;
+      last_name: string;
+      unique_id_number: string;
+      email: string;
+      role: string;
+    }
+    interface Attendee {
       id: string;
       staff_id: string;
-      profiles: unknown;
+      profiles: StaffMember | null;
       type: string;
-    }> = [];
+    }
+    const allAttendees: Attendee[] = [];
 
     // Add manual attendees
     if (manualAttendees && Array.isArray(manualAttendees)) {
@@ -104,7 +113,7 @@ export async function getMeetingAttendees(meetingId: string) {
 
     // Add checked-in staff (avoid duplicates)
     if (checkedInStaff && Array.isArray(checkedInStaff)) {
-      checkedInStaff.forEach((record: { profile_id: string; profiles: unknown }) => {
+      checkedInStaff.forEach((record: { profile_id: string; profiles: StaffMember | null }) => {
         if (!staffIds.has(record.profile_id)) {
           staffIds.add(record.profile_id);
           allAttendees.push({

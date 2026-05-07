@@ -16,7 +16,8 @@ interface StaffMember {
 interface Attendee {
   id: string;
   staff_id: string;
-  profiles: StaffMember;
+  profiles: StaffMember | null;
+  type?: string;
 }
 
 export default function AttendeeTracker({
@@ -135,6 +136,10 @@ export default function AttendeeTracker({
         <div className="space-y-2">
           {attendees.map((attendee) => {
             const profile = Array.isArray(attendee.profiles) ? attendee.profiles[0] : attendee.profiles;
+            
+            if (!profile) {
+              return null;
+            }
             
             return (
               <div
