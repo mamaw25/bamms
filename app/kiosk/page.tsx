@@ -40,10 +40,10 @@ export default function KioskPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center p-4 text-white font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-[#1A4480] via-[#1a3a60] to-[#0f2344] flex flex-col items-center justify-center p-4 text-white font-sans">
       
       {/* Main Kiosk Box */}
-      <div className="bg-[#1e293b] pt-10 px-8 pb-8 rounded-3xl shadow-2xl border border-slate-700 w-full max-w-md text-center transition-all">
+      <div className="bg-white/10 backdrop-blur-md pt-10 px-8 pb-8 rounded-3xl shadow-2xl border border-white/20 w-full max-w-md text-center transition-all">
         
         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transition-all duration-300 ${
           status.type === 'success' ? 'bg-green-600' : 
@@ -60,7 +60,7 @@ export default function KioskPage() {
            status.type === 'error' ? '✗ Error' : 
            'ATTENDANCE KIOSK'}
         </h1>
-        <p className="text-slate-400 text-sm mb-8 font-medium">
+        <p className="text-blue-200 text-sm mb-8 font-medium">
           {status.type === 'success' ? status.msg : 
            status.type === 'error' ? status.msg :
            'Enter your ID number'}
@@ -76,7 +76,7 @@ export default function KioskPage() {
               onChange={(e) => setIdNumber(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && processAction()}
               disabled={isLoading}
-              className="w-full px-6 py-5 bg-[#0f172a] border-2 border-slate-700 rounded-xl text-white font-bold text-2xl focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-700 placeholder:text-center text-center"
+              className="w-full px-6 py-5 bg-[#1A4480] border-2 border-blue-400/30 rounded-xl text-white font-bold text-2xl focus:outline-none focus:border-blue-300 transition-all placeholder:text-blue-300 placeholder:text-center text-center"
             />
             <button
               onClick={processAction}
@@ -97,7 +97,7 @@ export default function KioskPage() {
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-slate-600 text-[11px] font-mono uppercase tracking-[0.3em]">
+      <div className="mt-8 text-blue-300 text-[11px] font-mono uppercase tracking-[0.3em]">
         <p>Kiosk System v2.0</p>
       </div>
     </div>

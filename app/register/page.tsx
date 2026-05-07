@@ -33,8 +33,8 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 font-sans">
-        <div className="bg-[#1e293b] p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700 text-center transition-all">
+      <div className="min-h-screen bg-gradient-to-br from-[#1A4480] via-[#1a3a60] to-[#0f2344] flex items-center justify-center p-4 font-sans">
+        <div className="bg-white/10 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 text-center transition-all">
           <div className="text-center">
             <div className="mb-4">
               <svg
@@ -54,27 +54,27 @@ export default function RegisterPage() {
             <h2 className="text-2xl font-black text-white text-center uppercase mb-4">
               Account Created!
             </h2>
-            <p className="text-slate-300 mb-4">
+            <p className="text-blue-100 mb-4">
               We&apos;ve sent a verification email to:
             </p>
-            <p className="text-blue-400 font-bold mb-6 break-all">{registeredEmail}</p>
-            <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-lg mb-6">
-              <p className="text-slate-300 text-sm">
+            <p className="text-blue-200 font-bold mb-6 break-all">{registeredEmail}</p>
+            <div className="bg-blue-600/20 border border-blue-400/30 p-4 rounded-lg mb-6">
+              <p className="text-blue-100 text-sm">
                 Please click the link in the email to verify your address. The link will expire in 24 hours.
               </p>
             </div>
             
             {verificationToken && (
-              <details className="mb-6 p-3 bg-slate-800/50 border border-slate-600 rounded-lg">
-                <summary className="text-slate-300 text-xs cursor-pointer font-semibold hover:text-slate-200">
+              <details className="mb-6 p-3 bg-blue-900/30 border border-blue-400/20 rounded-lg">
+                <summary className="text-blue-100 text-xs cursor-pointer font-semibold hover:text-blue-50">
                   ⚠️ Didn&apos;t receive email? Click here for manual verification
                 </summary>
-                <div className="mt-3 pt-3 border-t border-slate-600">
-                  <p className="text-slate-400 text-xs mb-2">
+                <div className="mt-3 pt-3 border-t border-blue-400/20">
+                  <p className="text-blue-200 text-xs mb-2">
                     Copy and paste this link in your browser:
                   </p>
-                  <div className="bg-[#0f172a] p-2 rounded border border-slate-700 mb-3">
-                    <code className="text-blue-400 text-xs break-all">
+                  <div className="bg-[#1A4480] p-2 rounded border border-blue-400/30 mb-3">
+                    <code className="text-blue-300 text-xs break-all">
                       {`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`}
                     </code>
                   </div>
@@ -83,7 +83,7 @@ export default function RegisterPage() {
                       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
                       window.location.href = `${appUrl}/verify-email?token=${verificationToken}`
                     }}
-                    className="w-full text-xs bg-slate-700 hover:bg-slate-600 text-white py-2 rounded font-bold transition-all"
+                    className="w-full text-xs bg-blue-600 hover:bg-blue-500 text-white py-2 rounded font-bold transition-all"
                   >
                     Verify Email Now
                   </button>
@@ -91,7 +91,7 @@ export default function RegisterPage() {
               </details>
             )}
             
-            <p className="text-slate-400 text-xs mb-6">
+            <p className="text-blue-200 text-xs mb-6">
               Once verified, you&apos;ll be able to log in to the system.
             </p>
             <button
@@ -105,7 +105,7 @@ export default function RegisterPage() {
                 setSuccess(false)
                 setRegisteredEmail(null)
               }}
-              className="w-full mt-3 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-bold uppercase tracking-widest transition-all"
+              className="w-full mt-3 bg-blue-600/50 hover:bg-blue-600 text-white py-3 rounded-xl font-bold uppercase tracking-widest transition-all"
             >
               Register Another Account
             </button>
@@ -116,8 +116,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 font-sans">
-      <div className="bg-[#1e293b] p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700 text-center transition-all">
+    <div className="min-h-screen bg-gradient-to-br from-[#1A4480] via-[#1a3a60] to-[#0f2344] flex items-center justify-center p-4 font-sans">
+      <div className="bg-white/10 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 text-center transition-all">
         <h2 className="text-2xl font-black text-white text-center uppercase mb-6">Create Account</h2>
         
         {error && (
@@ -128,12 +128,12 @@ export default function RegisterPage() {
 
         <form action={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <input name="firstName" placeholder="First Name" required className="bg-[#0f172a] border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500" />
-            <input name="lastName" placeholder="Last Name" required className="bg-[#0f172a] border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500" />
+            <input name="firstName" placeholder="First Name" required className="bg-[#1A4480] border border-blue-400/30 p-3 rounded-xl text-white outline-none focus:border-blue-300" />
+            <input name="lastName" placeholder="Last Name" required className="bg-[#1A4480] border border-blue-400/30 p-3 rounded-xl text-white outline-none focus:border-blue-300" />
           </div>
-          <input name="email" type="email" placeholder="Email" required className="w-full bg-[#0f172a] border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500" />
-          <input name="password" type="password" placeholder="Password" required className="w-full bg-[#0f172a] border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500" />
-          <input name="adminCode" placeholder="Admin Code (Optional)" className="w-full bg-[#0f172a] border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500" />
+          <input name="email" type="email" placeholder="Email" required className="w-full bg-[#1A4480] border border-blue-400/30 p-3 rounded-xl text-white outline-none focus:border-blue-300" />
+          <input name="password" type="password" placeholder="Password" required className="w-full bg-[#1A4480] border border-blue-400/30 p-3 rounded-xl text-white outline-none focus:border-blue-300" />
+          <input name="adminCode" placeholder="Admin Code (Optional)" className="w-full bg-[#1A4480] border border-blue-400/30 p-3 rounded-xl text-white outline-none focus:border-blue-300" />
           
           <button 
             disabled={loading}
@@ -144,10 +144,10 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-700/50 text-center">
+        <div className="mt-8 pt-6 border-t border-blue-400/20 text-center">
           <button
             onClick={() => router.push('/')}
-            className="text-[10px] font-bold text-slate-500 hover:text-slate-300 uppercase tracking-[0.2em] transition-colors"
+            className="text-[10px] font-bold text-blue-300 hover:text-blue-100 uppercase tracking-[0.2em] transition-colors"
           >
             ← Return to Landing Page
           </button>

@@ -38,8 +38,8 @@ function LoginForm() {
 
   return (
     /* Unified background to match the landing page */
-    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 font-sans">
-      <div className="bg-[#1e293b] p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700 text-center transition-all">
+    <div className="min-h-screen bg-gradient-to-br from-[#1A4480] via-[#1a3a60] to-[#0f2344] flex items-center justify-center p-4 font-sans">
+      <div className="bg-white/10 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 text-center transition-all">
         
         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg ${
           isAdmin ? 'bg-blue-600' : 'bg-emerald-600'
@@ -52,7 +52,7 @@ function LoginForm() {
         }`}>
           {isAdmin ? 'Admin Portal' : 'Staff Portal'}
         </h2>
-        <p className="text-slate-400 text-center text-sm mb-8 font-medium">Please sign in to your account</p>
+        <p className="text-blue-200 text-center text-sm mb-8 font-medium">Please sign in to your account</p>
         
         {error && (
           <div className="mb-6 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-bold text-center animate-in fade-in zoom-in duration-300">
@@ -62,23 +62,23 @@ function LoginForm() {
 
         <form action={clientAction} className="space-y-4">
           <div>
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Email Address</label>
+            <label className="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2 block">Email Address</label>
             <input 
               name="email" 
               type="email" 
               required 
               placeholder="name@example.com"
-              className="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-800"
+              className="w-full bg-[#1A4480] border border-blue-400/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-300 transition-all placeholder:text-blue-400"
             />
           </div>
           <div>
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Password</label>
+            <label className="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2 block">Password</label>
             <input 
               name="password" 
               type="password" 
               required 
               placeholder="••••••••"
-              className="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-800"
+              className="w-full bg-[#1A4480] border border-blue-400/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-300 transition-all placeholder:text-blue-400"
             />
           </div>
           
@@ -94,10 +94,10 @@ function LoginForm() {
         </form>
 
         {/* Fixed: Use <Link> instead of <a> to resolve ESLint error */}
-        <div className="mt-8 pt-6 border-t border-slate-700/50 text-center">
+        <div className="mt-8 pt-6 border-t border-blue-400/20 text-center">
             <Link 
               href="/" 
-              className="text-[10px] font-bold text-slate-500 hover:text-slate-300 uppercase tracking-[0.2em] transition-colors"
+              className="text-[10px] font-bold text-blue-300 hover:text-blue-100 uppercase tracking-[0.2em] transition-colors"
             >
               ← Return to Landing Page
             </Link>
