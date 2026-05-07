@@ -220,9 +220,8 @@ export default function LeaveRequestFormTemplate() {
             }),
 
             new Paragraph({
-              text: 'Request Type *',
-              spacing: { after: 50 },
-              bold: true
+              children: [new TextRun({ text: 'Request Type *', bold: true })],
+              spacing: { after: 50 }
             }),
 
             new Paragraph({
@@ -297,9 +296,8 @@ export default function LeaveRequestFormTemplate() {
             }),
 
             new Paragraph({
-              text: 'Reason for Leave *',
-              spacing: { after: 50 },
-              bold: true
+              children: [new TextRun({ text: 'Reason for Leave *', bold: true })],
+              spacing: { after: 50 }
             }),
 
             new Table({
