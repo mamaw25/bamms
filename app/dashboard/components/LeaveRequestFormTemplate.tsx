@@ -121,25 +121,20 @@ export default function LeaveRequestFormTemplate() {
           children: [
             // Header
             new Paragraph({
-              text: 'LEAVE REQUEST FORM',
+              runs: [new TextRun({ text: 'LEAVE REQUEST FORM', size: 48, bold: true })],
               alignment: AlignmentType.CENTER,
               spacing: { after: 100 },
-              thematicBreak: true,
-              size: 24,
-              bold: true
+              thematicBreak: true
             }),
             new Paragraph({
-              text: 'Please fill out all required fields and submit to your supervisor',
+              runs: [new TextRun({ text: 'Please fill out all required fields and submit to your supervisor', size: 40 })],
               alignment: AlignmentType.CENTER,
-              spacing: { after: 200 },
-              size: 20
+              spacing: { after: 200 }
             }),
 
             // Employee Information Section
             new Paragraph({
-              text: 'EMPLOYEE INFORMATION',
-              size: 22,
-              bold: true,
+              runs: [new TextRun({ text: 'EMPLOYEE INFORMATION', size: 44, bold: true })],
               spacing: { before: 100, after: 100 },
               border: {
                 bottom: { color: '000000', space: 1, style: BorderStyle.SINGLE, size: 6 }
@@ -217,9 +212,7 @@ export default function LeaveRequestFormTemplate() {
 
             // Leave Details Section
             new Paragraph({
-              text: 'LEAVE DETAILS',
-              size: 22,
-              bold: true,
+              runs: [new TextRun({ text: 'LEAVE DETAILS', size: 44, bold: true })],
               spacing: { before: 200, after: 100 },
               border: {
                 bottom: { color: '000000', space: 1, style: BorderStyle.SINGLE, size: 6 }
@@ -326,9 +319,7 @@ export default function LeaveRequestFormTemplate() {
 
             // Signatures Section
             new Paragraph({
-              text: 'APPROVALS',
-              size: 22,
-              bold: true,
+              runs: [new TextRun({ text: 'APPROVALS', size: 44, bold: true })],
               spacing: { before: 200, after: 100 },
               border: {
                 bottom: { color: '000000', space: 1, style: BorderStyle.SINGLE, size: 6 }
