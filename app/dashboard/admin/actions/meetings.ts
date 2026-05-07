@@ -100,12 +100,13 @@ export async function getMeetingAttendees(meetingId: string) {
 
     // Add manual attendees
     if (manualAttendees && Array.isArray(manualAttendees)) {
-      manualAttendees.forEach((attendee) => {
+      manualAttendees.forEach((attendee: any) => {
         staffIds.add(attendee.staff_id);
+        const profile = Array.isArray(attendee.profiles) ? attendee.profiles[0] : attendee.profiles;
         allAttendees.push({
           id: attendee.id,
           staff_id: attendee.staff_id,
-          profiles: attendee.profiles,
+          profiles: (profile as StaffMember) || null,
           type: 'manual',
         });
       });
@@ -113,13 +114,14 @@ export async function getMeetingAttendees(meetingId: string) {
 
     // Add checked-in staff (avoid duplicates)
     if (checkedInStaff && Array.isArray(checkedInStaff)) {
-      checkedInStaff.forEach((record: { profile_id: string; profiles: StaffMember | null }) => {
+      checkedInStaff.forEach((record: any) => {
         if (!staffIds.has(record.profile_id)) {
           staffIds.add(record.profile_id);
+          const profile = Array.isArray(record.profiles) ? record.profiles[0] : record.profiles;
           allAttendees.push({
             id: `checkin_${record.profile_id}`,
             staff_id: record.profile_id,
-            profiles: record.profiles,
+            profiles: (profile as StaffMember) || null,
             type: 'auto_checkin',
           });
         }
