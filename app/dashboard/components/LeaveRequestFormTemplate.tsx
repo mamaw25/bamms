@@ -149,11 +149,11 @@ export default function LeaveRequestFormTemplate() {
                   children: [
                     new TableCell({
                       children: [new Paragraph('Full Name *')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     }),
                     new TableCell({
                       children: [new Paragraph('ID Number *')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     })
                   ]
                 }),
@@ -162,11 +162,11 @@ export default function LeaveRequestFormTemplate() {
                   children: [
                     new TableCell({
                       children: [new Paragraph('')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     }),
                     new TableCell({
                       children: [new Paragraph('')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     })
                   ]
                 })
@@ -186,11 +186,11 @@ export default function LeaveRequestFormTemplate() {
                   children: [
                     new TableCell({
                       children: [new Paragraph('Email *')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     }),
                     new TableCell({
                       children: [new Paragraph('Date of Request *')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     })
                   ]
                 }),
@@ -199,11 +199,11 @@ export default function LeaveRequestFormTemplate() {
                   children: [
                     new TableCell({
                       children: [new Paragraph('')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     }),
                     new TableCell({
                       children: [new Paragraph('')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     })
                   ]
                 })
@@ -238,11 +238,11 @@ export default function LeaveRequestFormTemplate() {
                   children: [
                     new TableCell({
                       children: [new Paragraph('Start Date *')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     }),
                     new TableCell({
                       children: [new Paragraph('End Date *')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     })
                   ]
                 }),
@@ -251,11 +251,11 @@ export default function LeaveRequestFormTemplate() {
                   children: [
                     new TableCell({
                       children: [new Paragraph('')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     }),
                     new TableCell({
                       children: [new Paragraph('')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     })
                   ]
                 })
@@ -275,7 +275,7 @@ export default function LeaveRequestFormTemplate() {
                   children: [
                     new TableCell({
                       children: [new Paragraph('Number of Days *')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     })
                   ]
                 }),
@@ -284,7 +284,7 @@ export default function LeaveRequestFormTemplate() {
                   children: [
                     new TableCell({
                       children: [new Paragraph('')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     })
                   ]
                 })
@@ -310,7 +310,7 @@ export default function LeaveRequestFormTemplate() {
                   children: [
                     new TableCell({
                       children: [new Paragraph('')],
-                      borders: { all: { style: BorderStyle.SINGLE } }
+                      borders: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 }, left: { style: BorderStyle.SINGLE, size: 6 }, right: { style: BorderStyle.SINGLE, size: 6 } }
                     })
                   ]
                 })
@@ -343,7 +343,7 @@ export default function LeaveRequestFormTemplate() {
                           spacing: { before: 50 }
                         })
                       ],
-                      borders: { all: { style: BorderStyle.NONE } }
+                      borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
                     }),
                     new TableCell({
                       children: [
@@ -357,7 +357,7 @@ export default function LeaveRequestFormTemplate() {
                           spacing: { before: 50 }
                         })
                       ],
-                      borders: { all: { style: BorderStyle.NONE } }
+                      borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
                     })
                   ]
                 })
@@ -563,3 +563,4 @@ export default function LeaveRequestFormTemplate() {
     </div>
   )
 }
+
