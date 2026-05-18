@@ -35,6 +35,7 @@ export async function sendVerificationEmail(
   }
 
   try {
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -42,7 +43,7 @@ export async function sendVerificationEmail(
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'noreply@resend.dev', // Use Resend's default domain (doesn't require verification)
+        from: fromEmail, // Use verified email from environment
         to: email,
         subject: 'Verify Your Email Address',
         html: generateVerificationEmailHTML(firstName, verificationUrl),
