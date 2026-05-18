@@ -21,7 +21,12 @@ function VerifyEmailContent() {
 
     // Call the verification endpoint
     fetch(`/api/verify-email?token=${token}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`)
+        }
+        return res.json()
+      })
       .then(data => {
         if (data.success) {
           setStatus('success')
@@ -38,7 +43,7 @@ function VerifyEmailContent() {
       .catch(error => {
         console.error('Verification error:', error)
         setStatus('error')
-        setMessage('An error occurred during verification')
+        setMessage('An error occurred during verification. Please try again or contact support.')
       })
   }, [token, router])
 
