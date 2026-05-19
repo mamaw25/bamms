@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Users, Plus, Calendar } from 'lucide-react'
-import Link from 'next/link'
-import { StaffActionButtons } from './StaffActionButtons'
+import { Users, Calendar } from 'lucide-react'
 import LeaveRequestsManagement from './LeaveRequestsManagement'
 import { createClient } from '@supabase/supabase-js'
 
@@ -103,16 +101,11 @@ export default function StaffManagementPage() {
       {/* Tab Content */}
       {activeTab === 'staff' ? (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+          <div className="p-6 border-b border-gray-200 flex items-center">
             <div className="flex items-center gap-3 text-blue-600 font-bold uppercase tracking-widest text-[10px]">
               <Users size={20} />
               <h2>Staff Members ({staffList.length})</h2>
             </div>
-          <Link href="/dashboard/admin/staff/add">
-            <button className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
-              <Plus size={16} /> Add Staff
-            </button>
-          </Link>
         </div>
 
         {staffList.length > 0 ? (
@@ -124,7 +117,6 @@ export default function StaffManagementPage() {
                   <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-600 uppercase tracking-widest">ID Number</th>
                   <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-600 uppercase tracking-widest">Email</th>
                   <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-600 uppercase tracking-widest">Role</th>
-                  <th className="px-6 py-4 text-center text-[10px] font-bold text-gray-600 uppercase tracking-widest">Actions</th>
                 </tr>
               </thead>
               <tbody suppressHydrationWarning>
@@ -143,14 +135,6 @@ export default function StaffManagementPage() {
                       <span className="inline-block bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold uppercase">
                         {staff.role}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <StaffActionButtons
-                        staffId={staff.id}
-                        firstName={staff.first_name}
-                        lastName={staff.last_name}
-                        uniqueId={staff.unique_id_number}
-                      />
                     </td>
                   </tr>
                 ))}

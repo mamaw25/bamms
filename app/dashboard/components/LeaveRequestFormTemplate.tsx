@@ -1,6 +1,6 @@
 'use client'
 
-import { Download, Printer, FileText } from 'lucide-react'
+import { Download, Printer } from 'lucide-react'
 import { useRef } from 'react'
 import { Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, BorderStyle, WidthType, AlignmentType, VerticalAlign } from 'docx'
 
@@ -9,107 +9,94 @@ export default function LeaveRequestFormTemplate() {
 
   const handlePrint = () => {
     if (formRef.current) {
-      const printWindow = window.open('', '', 'height=600,width=800')
+      // Create a new window with the form content, preserving all styles
+      const printWindow = window.open('', '', 'width=900,height=600')
       if (printWindow) {
+        const formElement = formRef.current
+        const formHTML = formElement.innerHTML
+        
+        const styles = `
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; line-height: 1.5; }
+            @page { margin: 0.5in; size: 8.5in 11in; }
+            @media print { 
+              body { padding: 0; margin: 0; }
+              .no-print { display: none; }
+            }
+            
+            /* Tailwind print utilities */
+            .w-full { width: 100%; }
+            .bg-white { background-color: white; }
+            .p-12 { padding: 3rem; }
+            .border { border: 1px solid; }
+            .border-gray-300 { border-color: rgb(209, 213, 219); }
+            .rounded-lg { border-radius: 0.5rem; }
+            .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+            .text-center { text-align: center; }
+            .mb-8 { margin-bottom: 2rem; }
+            .mb-6 { margin-bottom: 1.5rem; }
+            .mb-4 { margin-bottom: 1rem; }
+            .mb-2 { margin-bottom: 0.5rem; }
+            .mb-1 { margin-bottom: 0.25rem; }
+            .pb-4 { padding-bottom: 1rem; }
+            .pb-2 { padding-bottom: 0.5rem; }
+            .border-b-2 { border-bottom-width: 2px; }
+            .border-b { border-bottom-width: 1px; }
+            .border-gray-800 { border-color: rgb(31, 41, 55); }
+            .border-gray-300 { border-color: rgb(209, 213, 219); }
+            .border-gray-400 { border-color: rgb(156, 163, 175); }
+            .text-2xl { font-size: 1.5rem; }
+            .text-sm { font-size: 0.875rem; }
+            .text-xs { font-size: 0.75rem; }
+            .font-bold { font-weight: bold; }
+            .text-gray-900 { color: rgb(17, 24, 39); }
+            .text-gray-600 { color: rgb(75, 85, 99); }
+            .text-gray-700 { color: rgb(55, 65, 81); }
+            .text-gray-500 { color: rgb(107, 114, 128); }
+            .uppercase { text-transform: uppercase; }
+            .tracking-widest { letter-spacing: 0.1em; }
+            .mt-10 { margin-top: 2.5rem; }
+            .mt-1 { margin-top: 0.25rem; }
+            .pt-4 { padding-top: 1rem; }
+            .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+            .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+            .min-h-8 { min-height: 2rem; }
+            .min-h-24 { min-height: 6rem; }
+            .h-12 { height: 3rem; }
+            .grid { display: grid; }
+            .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .gap-4 { gap: 1rem; }
+            .gap-8 { gap: 2rem; }
+            .flex { display: flex; }
+            .items-center { align-items: center; }
+            .gap-2 { gap: 0.5rem; }
+            .mt-4 { margin-top: 1rem; }
+          </style>
+        `
+        
         printWindow.document.write(`
           <!DOCTYPE html>
           <html>
             <head>
+              <meta charset="UTF-8">
               <title>Leave Request Form</title>
-              <style>
-                body { font-family: Arial, sans-serif; padding: 20px; margin: 0; }
-                .form-container { max-width: 800px; margin: 0 auto; }
-                @media print { body { padding: 0; } .no-print { display: none; } }
-                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; }
-                .header h1 { margin: 0; font-size: 20px; }
-                .section-title { font-weight: bold; font-size: 11px; margin-top: 15px; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #999; padding-bottom: 5px; }
-                .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 10px; }
-                .field-row.full { grid-template-columns: 1fr; }
-                .field-row.triple { grid-template-columns: 1fr 1fr 1fr; }
-                .field { display: flex; flex-direction: column; }
-                .field label { font-weight: bold; font-size: 10px; margin-bottom: 3px; text-transform: uppercase; }
-                .field-input { border: 1px solid #999; min-height: 20px; padding: 5px; font-size: 11px; }
-                .field-input.tall { min-height: 60px; }
-                .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-                .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 11px; }
-                .checkbox { width: 14px; height: 14px; border: 1px solid #999; }
-                .signature-section { margin-top: 30px; }
-                .signature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-                .sig-box { display: flex; flex-direction: column; }
-                .sig-line { border-bottom: 1px solid #333; height: 40px; margin-bottom: 5px; }
-                .sig-label { font-size: 10px; }
-              </style>
+              ${styles}
             </head>
             <body>
-              <div class="form-container">
-                <div class="header">
-                  <h1>LEAVE REQUEST FORM</h1>
-                  <p style="margin: 5px 0; font-size: 10px; color: #666;">Please fill out all required fields and submit to your supervisor</p>
-                </div>
-
-                <div class="section-title">Employee Information</div>
-                <div class="field-row">
-                  <div class="field"><label>Full Name *</label><div class="field-input"></div></div>
-                  <div class="field"><label>ID Number *</label><div class="field-input"></div></div>
-                </div>
-                <div class="field-row">
-                  <div class="field"><label>Email *</label><div class="field-input"></div></div>
-                  <div class="field"><label>Date of Request *</label><div class="field-input"></div></div>
-                </div>
-
-                <div class="section-title">Leave Details</div>
-                <div class="field-row full">
-                  <div class="field">
-                    <label>Request Type *</label>
-                    <div class="checkbox-group">
-                      <div class="checkbox-item"><div class="checkbox"></div><span>Sick Leave</span></div>
-                      <div class="checkbox-item"><div class="checkbox"></div><span>Maternity Leave</span></div>
-                      <div class="checkbox-item"><div class="checkbox"></div><span>Paternity Leave</span></div>
-                      <div class="checkbox-item"><div class="checkbox"></div><span>Other</span></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="field-row">
-                  <div class="field"><label>Start Date *</label><div class="field-input"></div></div>
-                  <div class="field"><label>End Date *</label><div class="field-input"></div></div>
-                </div>
-                <div class="field-row full">
-                  <div class="field"><label>Number of Days *</label><div class="field-input"></div></div>
-                </div>
-
-                <div style="margin-top: 15px;">
-                  <div class="field"><label>Reason for Leave *</label><div class="field-input tall"></div></div>
-                </div>
-
-                <div class="signature-section">
-                  <div class="section-title">Approvals</div>
-                  <div class="signature-row">
-                    <div class="sig-box">
-                      <label style="font-size: 10px; margin-bottom: 8px;">Employee Signature:</label>
-                      <div class="sig-line"></div>
-                      <div class="sig-label">Date: _______________</div>
-                    </div>
-                    <div class="sig-box">
-                      <label style="font-size: 10px; margin-bottom: 8px;">Supervisor/Admin Approval:</label>
-                      <div class="sig-line"></div>
-                      <div class="sig-label">Date: _______________</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #999; text-align: center; font-size: 9px; color: #666;">
-                  <p>This form must be submitted before the leave period begins</p>
-                  <p>For questions, contact HR department</p>
-                </div>
+              <div style="width: 8.5in; margin: 0 auto; padding: 20px;">
+                ${formHTML}
               </div>
             </body>
           </html>
         `)
         printWindow.document.close()
+        
+        // Trigger print after content loads
         setTimeout(() => {
+          printWindow.focus()
           printWindow.print()
-          printWindow.close()
-        }, 250)
+        }, 500)
       }
     }
   }
@@ -404,7 +391,7 @@ export default function LeaveRequestFormTemplate() {
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-widest transition-all"
         >
           <Printer size={16} />
-          Print Form
+          Print / Save as PDF
         </button>
         <button
           onClick={handleDownloadWord}
@@ -412,13 +399,6 @@ export default function LeaveRequestFormTemplate() {
         >
           <Download size={16} />
           Download (.docx)
-        </button>
-        <button
-          onClick={handlePrint}
-          className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-widest transition-all"
-        >
-          <FileText size={16} />
-          Export as PDF
         </button>
       </div>
 

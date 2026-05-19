@@ -1,12 +1,4 @@
-[00:00:06.240] Server  LOG     
-[00:00:06.241] Server  LOG       We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
-[00:00:06.242] Server  LOG       The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
-
-[00:00:06.242] Server  LOG       	- target was set to ES2017 (For top-level `await`. Note: Next.js only polyfills for the esmodules target.)
-[00:00:06.242] Server  LOG       	- allowJs was set to true
-[00:00:06.242] Server  LOG       	- incremental was set to true
-[00:00:06.243] Server  LOG       	- include was updated to add '.next/types/**/*.ts'
-[00:00:06.243] Server  LOG       	- include was updated to add '.next/dev/types/**/*.ts'
-[00:00:06.243] Server  LOG       	- plugins was updated to add { name: 'next' }
-[00:00:06.244] Server  LOG     
-[00:00:07.329] Server  LOG     ✓ Ready in 6.5s
+[00:00:06.426] Server  LOG     ○ Compiling middleware ...
+[00:00:07.457] Server  LOG     ✓ Ready in 6.2s
+[00:00:32.780] Server  LOG     ○ Compiling /_not-found/page ...
+[00:00:42.392] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold

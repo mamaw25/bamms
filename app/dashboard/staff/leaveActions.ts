@@ -25,6 +25,11 @@ export async function submitLeaveRequest(formData: FormData) {
       return { success: false, error: 'End date must be after start date' }
     }
 
+    // Validate reason is not empty
+    if (!reason || reason.trim() === '') {
+      return { success: false, error: 'Reason is required' }
+    }
+
     const { data, error } = await supabase
       .from('leave_requests')
       .insert({
@@ -32,7 +37,7 @@ export async function submitLeaveRequest(formData: FormData) {
         request_type: requestType,
         start_date: startDate,
         end_date: endDate,
-        reason: reason || null,
+        reason: reason.trim(),
         status: 'pending'
       })
       .select()
