@@ -11,10 +11,6 @@ const config: Config = {
     },
   },
   plugins: [],
-  // Disable CSS variables that use lab() color function
-  corePlugins: {
-    // This prevents Tailwind from generating lab() color functions
-  },
 }
 
 export default config
